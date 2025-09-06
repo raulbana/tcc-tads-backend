@@ -1,6 +1,21 @@
 spring:
   application:
-  name: daily-iu-services
+    name: daily-iu-services
+
+  # --- MongoDB ---
   data:
     mongodb:
-      uri: mongodb://localhost:27017
+      uri: mongodb://backend-dailyiu-mongo-sandbox:IW92zu0C4aMuAOioerTZIo25xPtLNfxfFtBHsoCzpSAs8qZ5EVQOFxO5fBXM2mnaqr5NDLZS4DHfACDbSjfs1Q==@backend-dailyiu-mongo-sandbox.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@backend-dailyiu-mongo-sandbox@
+      database: daily-iu
+
+  # --- JPA  ---
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
