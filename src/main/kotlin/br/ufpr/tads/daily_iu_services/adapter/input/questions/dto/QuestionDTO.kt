@@ -1,4 +1,4 @@
-package br.ufpr.tads.daily_iu_services.adapter.input.dto
+package br.ufpr.tads.daily_iu_services.adapter.input.questions.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 
@@ -11,7 +11,6 @@ data class QuestionDTO(
     val min: Int?,
     val max: Int?,
     val step: Int?,
-    val labels: List<String>?,
     val required: Boolean?,
     val placeholder: String?
 )

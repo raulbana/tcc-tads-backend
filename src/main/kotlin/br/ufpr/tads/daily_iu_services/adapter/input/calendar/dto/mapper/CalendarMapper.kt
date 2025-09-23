@@ -1,0 +1,55 @@
+package br.ufpr.tads.daily_iu_services.adapter.input.calendar.dto.mapper
+
+import br.ufpr.tads.daily_iu_services.adapter.input.calendar.dto.CalendarDayDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.calendar.dto.UrinationDataDTO
+import br.ufpr.tads.daily_iu_services.domain.entity.calendar.CalendarDay
+import br.ufpr.tads.daily_iu_services.domain.entity.calendar.UrinationData
+import org.mapstruct.AfterMapping
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
+import org.mapstruct.MappingTarget
+import org.mapstruct.factory.Mappers
+import java.time.LocalDate
+
+@Mapper
+abstract class CalendarMapper {
+
+    companion object{
+        val INSTANCE: CalendarMapper = Mappers.getMapper(CalendarMapper::class.java)
+    }
+
+    @Mapping(target = "date", source = "calendar.date")
+    @Mapping(target = "leakageLevel", expression = "java(calendar.getLeakageLevel().toString())")
+    @Mapping(target = "eventsCount", source = "calendar.eventsCount")
+    @Mapping(target = "completedExercises", source = "calendar.completedExercises")
+    @Mapping(target = "notesPreview", source = "calendar.notesPreview")
+    @Mapping(target = "urinationData", expression = "java(urinationDataListToDTO(data))")
+    @Mapping(target = "dayTitle", source = "calendar.dayTitle")
+    @Mapping(target = "dayNumber", constant = "1")
+    @Mapping(target = "isToday", constant = "false")
+    abstract fun calendarDaytoDTO(calendar: CalendarDay, data: List<UrinationData>?): CalendarDayDTO
+
+    @AfterMapping
+    fun calendarDTOAfterMapping(@MappingTarget calendarDTO: CalendarDayDTO){
+        val date: LocalDate = LocalDate.parse(calendarDTO.date)
+        val today: LocalDate = LocalDate.now()
+        calendarDTO.dayNumber = date.dayOfMonth
+        calendarDTO.isToday = date.isEqual(today)
+    }
+
+    @Mapping(target = "amount", expression = "java(data.getAmount().toString())")
+    abstract fun urinationDatatoDTO(data: UrinationData): UrinationDataDTO
+
+    @Mapping(target = "id", ignore = true )
+    @Mapping(target = "calendarDay", ignore = true )
+    @Mapping(target = "amount", expression = "java(LeakageLevel.Companion.from(data.getAmount()))")
+    abstract fun urinationDataDTOtoEntity(data: UrinationDataDTO): UrinationData
+
+    fun urinationDataListToDTO(data: List<UrinationData>?): List<UrinationDataDTO>?{
+        return data?.map { urinationDatatoDTO(it) }
+    }
+
+    fun urinationDataDTOListToEntity(data: List<UrinationDataDTO>?): List<UrinationData>?{
+        return data?.map { urinationDataDTOtoEntity(it) }
+    }
+}

@@ -1,6 +1,6 @@
-package br.ufpr.tads.daily_iu_services.adapter.input
+package br.ufpr.tads.daily_iu_services.adapter.input.questions
 
-import br.ufpr.tads.daily_iu_services.adapter.input.dto.QuestionDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.QuestionDTO
 import br.ufpr.tads.daily_iu_services.domain.service.QuestionService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

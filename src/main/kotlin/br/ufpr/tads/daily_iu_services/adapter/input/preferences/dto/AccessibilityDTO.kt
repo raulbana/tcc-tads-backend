@@ -1,4 +1,4 @@
-package br.ufpr.tads.daily_iu_services.adapter.input.dto
+package br.ufpr.tads.daily_iu_services.adapter.input.preferences.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

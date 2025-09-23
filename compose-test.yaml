@@ -41,6 +41,23 @@ services:
     ports:
       - "10000:10000"
     command: "azurite-blob --blobHost 0.0.0.0 -l /data"
+    networks:
+      - dailyiu-network
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+      - localblobstorage
+    networks:
+      - dailyiu-network
 
 networks:
   dailyiu-network:
