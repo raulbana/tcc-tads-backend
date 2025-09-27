@@ -24,7 +24,7 @@ services:
     entrypoint: >
       /bin/bash -c "
         echo 'Aguardando o SQL Server iniciar...';
-        sleep 2;
+        sleep 60;
         echo 'Executando script de inicialização do banco de dados...';
         /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${DB_PASSWORD} -d master -i /tmp/init.sql &&
         echo 'Script de inicialização concluído. Inserindo dados...';
