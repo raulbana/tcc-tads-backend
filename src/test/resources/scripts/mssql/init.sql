@@ -111,9 +111,7 @@ CREATE TABlE media (
     url NVARCHAR(255) NOT NULL,
     contentType NVARCHAR(10) NOT NULL,
     contentSize BIGINT NOT NULL,
-    description NVARCHAR(1000),
     altText NVARCHAR(255) NOT NULL,
-    caption NVARCHAR(255) DEFAULT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE()
 );
 GO
@@ -163,7 +161,7 @@ GO
 CREATE TABLE content (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     title NVARCHAR(255) NOT NULL,
-    description NVARCHAR(MAX),
+    description NVARCHAR(MAX) NOT NULL,
     subtitle NVARCHAR(255),
     subContent NVARCHAR(MAX),
     categoryId INT NOT NULL,
@@ -173,8 +171,8 @@ CREATE TABLE content (
     repostByAuthorId BIGINT DEFAULT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
-    FOREIGN KEY (coverMediaId) REFERENCES media(id),
     FOREIGN KEY (authorId) REFERENCES appUser(id),
+    FOREIGN KEY (repostByAuthorId) REFERENCES appUser(id),
     FOREIGN KEY (categoryId) REFERENCES contentCategory(id)
 );
 GO
@@ -187,6 +185,7 @@ CREATE TABLE comment (
     reply BIT NOT NULL DEFAULT 0,
     replyToCommentId BIGINT DEFAULT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (contentId) REFERENCES content(id),
     FOREIGN KEY (authorId) REFERENCES appUser(id),
     FOREIGN KEY (replyToCommentId) REFERENCES comment(id)

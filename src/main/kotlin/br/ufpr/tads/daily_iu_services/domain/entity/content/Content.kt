@@ -7,13 +7,14 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 
 @Entity
 @Table(name = "content")
-class Content(
+data class Content(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -26,20 +27,26 @@ class Content(
     @JoinColumn(name = "categoryId", referencedColumnName = "id")
     var category: Category,
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "authorId", referencedColumnName = "id")
     val author: User,
 
-    val respost: Boolean,
-    val respostFromContentId: Long?,
-    val respostByAuthorId: Long?,
+    val repost: Boolean = false,
+    val repostFromContentId: Long? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "repostByAuthorId", referencedColumnName = "id")
+    val repostByAuthor: User? = null,
 
     @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val likes: List<ContentLikes>,
+    val likes: MutableList<ContentLikes> = mutableListOf(),
 
     @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val comments: List<Comment>,
+    val comments: MutableList<Comment> = mutableListOf(),
 
-    val createdAt: String,
-    val updatedAt: String
+    @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val media: MutableList<ContentMedia> = mutableListOf(),
+
+    val createdAt: String = "",
+    val updatedAt: String = ""
 )

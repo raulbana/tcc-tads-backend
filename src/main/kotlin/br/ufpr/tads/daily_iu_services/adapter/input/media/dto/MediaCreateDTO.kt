@@ -1,4 +1,4 @@
-package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
+package br.ufpr.tads.daily_iu_services.adapter.input.media.dto
 
 data class MediaCreateDTO(
     val url: String,

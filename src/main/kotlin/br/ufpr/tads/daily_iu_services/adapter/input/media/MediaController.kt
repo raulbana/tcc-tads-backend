@@ -1,6 +1,6 @@
-package br.ufpr.tads.daily_iu_services.adapter.input.content
+package br.ufpr.tads.daily_iu_services.adapter.input.media
 
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.MediaCreateDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaCreateDTO
 import br.ufpr.tads.daily_iu_services.domain.service.MediaService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping

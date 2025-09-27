@@ -1,6 +1,6 @@
 package br.ufpr.tads.daily_iu_services.domain.service
 
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.MediaCreateDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaCreateDTO
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.BlobServiceClient
 import com.azure.storage.blob.BlobServiceClientBuilder

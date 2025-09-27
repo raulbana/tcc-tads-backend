@@ -9,7 +9,7 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "contentCategory")
-class Category (
+data class Category (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -19,7 +19,4 @@ class Category (
 
     @Column(insertable = false, updatable = false)
     val createdAt: String?
-) {
-    fun copy(id: Long? = this.id, name: String = this.name, description: String = this.description, auditable: Boolean = this.auditable, createdAt: String? = this.createdAt) =
-        Category(id, name, description, auditable, createdAt)
-}
+)
