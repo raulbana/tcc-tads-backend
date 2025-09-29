@@ -21,7 +21,7 @@ class CalendarService(
     private val urinationDataRepository: UrinationDataRepository
 ) {
 
-    fun getCalendarEvents(userId: Long, from: String?, to: String?): HashMap<String, CalendarDayDTO> {
+    fun getCalendarEvents(userId: Long, from: LocalDate?, to: LocalDate?): HashMap<String, CalendarDayDTO> {
         val calendarEvents: List<CalendarDay> =
             if (from != null && to != null) {
                 calendarRepository.findByDateRangeAndUserId(from, to, userId)
@@ -41,7 +41,7 @@ class CalendarService(
 
         if (event == null) {
             val level = LeakageLevel.from(request.leakageLevel)
-            val date = LocalDate.parse(request.date)
+            val date = request.date
             val dayTitle = date.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL, Locale("pt", "BR")).subSequence(0, 3).toString()
 

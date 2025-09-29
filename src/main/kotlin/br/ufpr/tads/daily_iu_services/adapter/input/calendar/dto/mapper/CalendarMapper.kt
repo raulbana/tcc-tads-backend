@@ -31,7 +31,7 @@ abstract class CalendarMapper {
 
     @AfterMapping
     fun calendarDTOAfterMapping(@MappingTarget calendarDTO: CalendarDayDTO){
-        val date: LocalDate = LocalDate.parse(calendarDTO.date)
+        val date: LocalDate = calendarDTO.date
         val today: LocalDate = LocalDate.now()
         calendarDTO.dayNumber = date.dayOfMonth
         calendarDTO.isToday = date.isEqual(today)

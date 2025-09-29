@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "comment")
@@ -44,8 +45,8 @@ data class Comment(
     val likes: MutableList<CommentLikes> = mutableListOf(),
 
     @Column(insertable = false, updatable = false)
-    val createdAt: String = "",
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(insertable = false, updatable = false)
-    val updatedAt: String = ""
+    val updatedAt: LocalDateTime = LocalDateTime.now()
 )

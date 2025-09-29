@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "contentCategory")
@@ -18,5 +19,5 @@ data class Category (
     var auditable: Boolean,
 
     @Column(insertable = false, updatable = false)
-    val createdAt: String?
+    val createdAt: LocalDateTime?
 )

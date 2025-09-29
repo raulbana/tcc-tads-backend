@@ -25,6 +25,7 @@ class PreferencesController(private val service: PreferencesService) {
         @RequestHeader("x-user-id") @Min(1) userId: Long,
         @RequestBody() preferences: AccessibilityDTO
     ): ResponseEntity<Void> {
+        println(preferences)
         service.setAccessibilityPreferences(userId, preferences)
         return ResponseEntity.noContent().build()
     }

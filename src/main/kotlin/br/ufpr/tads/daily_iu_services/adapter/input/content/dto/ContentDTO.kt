@@ -2,7 +2,7 @@ package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
 
 import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaDTO
 import com.fasterxml.jackson.annotation.JsonInclude
-import java.util.Date
+import java.time.LocalDateTime
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ContentDTO(
@@ -22,6 +22,6 @@ data class ContentDTO(
     val isReposted: Boolean,
     val repostedFromContentId: Long?,
     val repostedByUser: AuthorDTO?,
-    val createdAt: String,
-    val updatedAt: String
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime
 )

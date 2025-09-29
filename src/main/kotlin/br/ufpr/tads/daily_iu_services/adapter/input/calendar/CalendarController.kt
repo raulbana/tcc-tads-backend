@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/v1/calendar")
@@ -20,8 +21,8 @@ class CalendarController(private val calendarService: CalendarService) {
 
     @GetMapping
     fun getCalendarEvents(
-        @RequestParam(required = false) @ValidDate(required = false) from: String?,
-        @RequestParam(required = false) @ValidDate(required = false) to: String?,
+        @RequestParam(required = false) @ValidDate(required = false) from: LocalDate?,
+        @RequestParam(required = false) @ValidDate(required = false) to: LocalDate?,
         @RequestHeader(value = "user-id") userId: Long
     ): ResponseEntity<HashMap<String, CalendarDayDTO>> {
         return ResponseEntity.ok(calendarService.getCalendarEvents(userId, from, to))

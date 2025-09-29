@@ -3,6 +3,7 @@ package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.jetbrains.annotations.NotNull
+import java.time.LocalDateTime
 
 data class CategoryDTO (
     val id: Long? = null,
@@ -17,5 +18,5 @@ data class CategoryDTO (
     @field:NotNull
     var auditable: Boolean,
 
-    val createdAt: String?
+    val createdAt: LocalDateTime?
 )

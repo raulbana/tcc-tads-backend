@@ -6,5 +6,5 @@ import java.time.LocalDateTime
 data class ReportDTO(
     val user: ReportUserDTO,
     val history: List<CalendarDayDTO>,
-    val generatedAt: LocalDateTime = LocalDateTime.now()
+    val generatedAt: LocalDateTime
 )

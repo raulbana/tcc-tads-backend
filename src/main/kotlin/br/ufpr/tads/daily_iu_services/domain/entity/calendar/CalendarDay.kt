@@ -1,6 +1,7 @@
 package br.ufpr.tads.daily_iu_services.domain.entity.calendar
 
 import jakarta.persistence.*
+import java.time.LocalDate
 
 @Entity
 @Table(name = "calendarDay")
@@ -10,7 +11,7 @@ class CalendarDay(
     val id: Long? = null,
 
     @Column(name = "dateValue")
-    val date: String,
+    val date: LocalDate,
     val userId: Long,
 
     @Enumerated(EnumType.STRING)

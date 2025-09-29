@@ -1,7 +1,9 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.calendar.dto
 
+import java.time.LocalDate
+
 data class CalendarDayDTO(
-    val date: String,
+    val date: LocalDate,
     val leakageLevel: String,
     val eventsCount: Int,
     val completedExercises: Int,
