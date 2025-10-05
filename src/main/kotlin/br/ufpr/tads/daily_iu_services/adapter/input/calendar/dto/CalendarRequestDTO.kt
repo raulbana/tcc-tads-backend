@@ -4,7 +4,7 @@ import br.ufpr.tads.daily_iu_services.domain.validator.ValidDate
 import java.time.LocalDate
 
 data class CalendarRequestDTO(
-    @field:ValidDate
+    @ValidDate
     val date: LocalDate,
     val leakageLevel: String,
     val notesPreview: String?,

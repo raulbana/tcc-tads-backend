@@ -31,7 +31,7 @@ class CalendarService(
             }
 
         return calendarEvents.map { CalendarMapper.INSTANCE.calendarDaytoDTO(it, urinationDataRepository.findBycalendarDay(it)) }
-            .associateBy { it.date } as HashMap<String, CalendarDayDTO>
+            .associateBy { it.date.toString() } as HashMap<String, CalendarDayDTO>
     }
 
     @Transactional

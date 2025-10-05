@@ -17,6 +17,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class ContentService(
@@ -61,8 +62,10 @@ class ContentService(
             subtitle = request.subtitle,
             subcontent = request.subcontent,
             category = category,
-            author = author
+            author = author,
+            createdAt = LocalDateTime.now()
         )
+
 
         val medias = request.media
             .map { ContentMapper.INSTANCE.mediaDTOToEntity(it) }
@@ -75,7 +78,6 @@ class ContentService(
             TODO("Implementar lógica de auditoria para categorias que necessitam de aprovação")
         } else {
             val result = contentRepository.save(content)
-
             return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)
         }
     }

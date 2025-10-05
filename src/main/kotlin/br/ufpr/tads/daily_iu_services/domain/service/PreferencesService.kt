@@ -19,10 +19,8 @@ class PreferencesService(private val repository: UserRepository) {
     fun setAccessibilityPreferences(userId: Long, preferences: AccessibilityDTO) {
         val user = repository.findById(userId)
             .orElseThrow { RuntimeException("Usuário não encontrado") }
-        println(preferences)
         user.preferences.bigFont = preferences.isBigFont
         user.preferences.highContrast = preferences.isHighContrast
-        println(user)
 
         repository.save(user)
     }

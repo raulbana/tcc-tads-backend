@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "content")
@@ -47,6 +48,6 @@ data class Content(
     @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
     val media: MutableList<ContentMedia> = mutableListOf(),
 
-    val createdAt: String = "",
-    val updatedAt: String = ""
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime = LocalDateTime.now()
 )

@@ -1,5 +1,6 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.calendar.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDate
 
 data class CalendarDayDTO(
