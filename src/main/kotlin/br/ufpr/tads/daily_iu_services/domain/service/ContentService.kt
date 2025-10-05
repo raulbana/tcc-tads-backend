@@ -66,7 +66,6 @@ class ContentService(
             createdAt = LocalDateTime.now()
         )
 
-
         val medias = request.media
             .map { ContentMapper.INSTANCE.mediaDTOToEntity(it) }
             .map { mediaRepository.save(it) }
