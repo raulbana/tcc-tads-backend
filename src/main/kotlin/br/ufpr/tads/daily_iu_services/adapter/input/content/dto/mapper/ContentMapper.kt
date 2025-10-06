@@ -19,6 +19,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
+import java.time.LocalDateTime
 
 @Mapper
 abstract class ContentMapper {
@@ -85,8 +86,8 @@ abstract class ContentMapper {
     @Mapping(target = "createdAt", source = "media.createdAt")
     abstract fun mediaToDTO(entity: ContentMedia): MediaDTO
 
-    @Mapping(target = "createdAt", constant = "")
-    @Mapping(target = "id", constant = "0l")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "id", ignore = true)
     abstract fun mediaDTOToEntity(dto: MediaDTO): Media
 
     @Mapping(target = "id", source = "comment.id")

@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDate
 
 @Entity
 @Table(name = "patientProfile")
@@ -12,7 +13,7 @@ class PatientProfile (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val birthDate: String,
+    val birthDate: LocalDate,
     val gender: String
     /*
     val q1Score: Double,

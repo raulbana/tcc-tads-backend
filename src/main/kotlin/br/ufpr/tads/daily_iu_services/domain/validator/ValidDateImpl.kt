@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-class ValidDateImpl : ConstraintValidator<ValidDate, String> {
+class ValidDateImpl : ConstraintValidator<ValidDate, LocalDate> {
     private var required = true
 
     companion object {
@@ -18,15 +18,14 @@ class ValidDateImpl : ConstraintValidator<ValidDate, String> {
         this.required = constraintAnnotation.required
     }
 
-    override fun isValid(input: String?, context: ConstraintValidatorContext): Boolean {
-        if (input == null || input.isEmpty()) {
+    override fun isValid(input: LocalDate?, context: ConstraintValidatorContext): Boolean {
+        if (input == null) {
             return !this.required
         }
 
         try {
-            val date = LocalDate.parse(input)
             context.disableDefaultConstraintViolation()
-            context.buildConstraintViolationWithTemplate(date.format(OUTPUT_FORMAT)).addConstraintViolation()
+            context.buildConstraintViolationWithTemplate(input.format(OUTPUT_FORMAT)).addConstraintViolation()
             return true
         } catch (_: DateTimeParseException) {
             return false

@@ -12,7 +12,7 @@ class PreferencesService(private val repository: UserRepository) {
     fun getAccessibilityPreferences(userId: Long): AccessibilityDTO {
         val user = repository.findById(userId)
             .orElseThrow { RuntimeException("Usuário não encontrado") }
-        return AccessibilityMapper.INSTANCE.UserToAccessibilityDTO(user)
+        return AccessibilityMapper.INSTANCE.userToAccessibilityDTO(user)
     }
 
     @Transactional

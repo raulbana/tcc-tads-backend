@@ -24,8 +24,12 @@ spring:
     username:
     password:
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enabled: false
+            required: false
 project:
   dailyiu:
     support:

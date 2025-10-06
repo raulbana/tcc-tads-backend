@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "media")
@@ -16,7 +17,7 @@ class Media(
     val contentType: String,
     val contentSize: Long,
     var altText: String,
-    var createdAt: String
+    var createdAt: LocalDateTime
 ){
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

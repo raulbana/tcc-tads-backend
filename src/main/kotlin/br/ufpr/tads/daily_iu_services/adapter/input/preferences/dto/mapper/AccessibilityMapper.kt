@@ -15,5 +15,5 @@ interface AccessibilityMapper {
 
     @Mapping(target = "isBigFont", source = "user.preferences.bigFont")
     @Mapping(target = "isHighContrast", source = "user.preferences.highContrast")
-    fun UserToAccessibilityDTO(user: User): AccessibilityDTO
+    fun userToAccessibilityDTO(user: User): AccessibilityDTO
 }

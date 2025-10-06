@@ -7,6 +7,7 @@ import br.ufpr.tads.daily_iu_services.domain.validator.ValidDate
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/v1/calendar")
@@ -24,8 +26,8 @@ class CalendarController(private val calendarService: CalendarService) {
     @GetMapping
     @Operation(summary = "Get calendar events", description = "Retrieve calendar events for a user within an optional date range")
     fun getCalendarEvents(
-        @RequestParam(required = false) @ValidDate(required = false) from: String?,
-        @RequestParam(required = false) @ValidDate(required = false) to: String?,
+        @RequestParam(required = false) @ValidDate(required = false) from: LocalDate?,
+        @RequestParam(required = false) @ValidDate(required = false) to: LocalDate?,
         @RequestHeader(value = "user-id") userId: Long
     ): ResponseEntity<HashMap<String, CalendarDayDTO>> {
         return ResponseEntity.ok(calendarService.getCalendarEvents(userId, from, to))

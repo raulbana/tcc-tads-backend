@@ -21,7 +21,7 @@ class GlobalExceptionHandler {
             .body(Message(
                 HttpStatus.PAYLOAD_TOO_LARGE.value(),
                 ExceptionOrigin.REQUEST.origin,
-                "O arquivo enviado é muito grande!")
+                "O arquivo enviado é muito grande")
             )
     }
 

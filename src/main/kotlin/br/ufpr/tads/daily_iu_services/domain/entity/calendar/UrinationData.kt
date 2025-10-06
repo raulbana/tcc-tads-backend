@@ -1,6 +1,7 @@
 package br.ufpr.tads.daily_iu_services.domain.entity.calendar
 
 import jakarta.persistence.*
+import java.sql.Time
 
 @Entity
 @Table(name = "urinationData")
@@ -10,7 +11,7 @@ class UrinationData(
     val id: Long? = null,
 
     @Column(name = "timeValue")
-    val time: String,
+    val time: Time,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendarDayId")

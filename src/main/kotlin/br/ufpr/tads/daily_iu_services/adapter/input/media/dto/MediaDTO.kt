@@ -3,6 +3,7 @@ package br.ufpr.tads.daily_iu_services.adapter.input.media.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 import jakarta.validation.constraints.NotBlank
 import org.jetbrains.annotations.NotNull
+import java.time.LocalDateTime
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class MediaDTO(
@@ -18,5 +19,5 @@ data class MediaDTO(
 
     @field:NotBlank(message = "O texto alternativo não pode ser vazio")
     val altText: String,
-    val createdAt: String?
+    val createdAt: LocalDateTime?
 )
