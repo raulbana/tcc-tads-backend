@@ -1,6 +1,49 @@
 spring:
   application:
-  name: daily-iu-services
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017
+    name: daily-iu-services
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.dialect.SQLServerDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${NOREPLY_EMAIL_URL}
+    password: ${NOREPLY_EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enabled: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 500MB
+project:
+  info:
+    app:
+        name: @project.name@
+        description: @project.description@
+        version: @project.version@
+  dailyiu:
+    support:
+      email: ${SUPPORT_EMAIL_URL}
+      noreply: ${NOREPLY_EMAIL_URL}
+    azure:
+      storage:
+        connection-string: ${AZURE_STORAGE_CONNECTION_STRING}
+        container-name: ${AZURE_STORAGE_CONTAINER_NAME}
+    security:
+      token:
+        secret: ${JWT_SECRET}

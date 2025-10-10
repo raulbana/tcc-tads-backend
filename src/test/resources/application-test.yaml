@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: daily-iu-services
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: embedded
+      schema-locations: classpath:scripts/h2/init.sql
+      data-locations: classpath:scripts/h2/data.sql
+  mail:
+    host: localhost
+    port: 3025
+    protocol: smtp
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enabled: false
+            required: false
+project:
+  dailyiu:
+    support:
+      email: suporte@localhost.com
+      noreply: noreply@localhost.com
+    azure:
+      storage:
+        connection-string: AccountName=mockstoreaccount;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/mockstoreaccount;
+        container-name: mock-container
+    security:
+      token:
+        secret: mock-secret-key

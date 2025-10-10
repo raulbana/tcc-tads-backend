@@ -1,0 +1,64 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    env_file:
+      - .env
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "1433:1433"
+    networks:
+      - dailyiu-network
+
+  ssqltools:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./src/test/resources/scripts/mssql/init.sql:/tmp/init.sql
+      - ./src/test/resources/scripts/mssql/data.sql:/tmp/data.sql
+    env_file:
+      - .env
+    entrypoint: >
+      /bin/bash -c "
+        echo 'Aguardando o SQL Server iniciar...';
+        sleep 2;
+        echo 'Executando script de inicialização do banco de dados...';
+        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${DB_PASSWORD} -d master -i /tmp/init.sql &&
+        echo 'Script de inicialização concluído. Inserindo dados...';
+        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${DB_PASSWORD} -d master -i /tmp/data.sql
+      "
+    networks:
+      - dailyiu-network
+
+  localblobstorage:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: localblobstorage
+    volumes:
+      - ./data/azurite:/data
+    ports:
+      - "10000:10000"
+    command: "azurite-blob --blobHost 0.0.0.0 -l /data"
+    networks:
+      - dailyiu-network
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+      - localblobstorage
+    networks:
+      - dailyiu-network
+
+networks:
+  dailyiu-network:
+    driver: bridge
