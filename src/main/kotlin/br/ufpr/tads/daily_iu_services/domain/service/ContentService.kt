@@ -5,7 +5,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentRepostDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentUpdateDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.LikeToggleDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
 import br.ufpr.tads.daily_iu_services.adapter.output.content.CategoryRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentRepository
@@ -160,12 +160,12 @@ class ContentService(
         return ContentMapper.INSTANCE.contentToDTO(result, request.repostedByUserId)
     }
 
-    fun toggleLikeContent(contentId: Long, toggle: LikeToggleDTO) {
+    fun toggleLikeContent(contentId: Long, toggle: ToggleDTO) {
         val content = contentRepository.findById(contentId).orElseThrow {
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
         }
 
-        if (toggle.like) {
+        if (toggle.control) {
             val alreadyLiked = content.likes.any { it.userId == toggle.userId }
             if (!alreadyLiked) {
                 content.likes.add(ContentLikes(content = content, userId = toggle.userId))

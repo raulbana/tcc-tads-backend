@@ -8,6 +8,7 @@ import org.mapstruct.AfterMapping
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.MappingTarget
+import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 import java.time.LocalDate
 
@@ -37,12 +38,24 @@ abstract class CalendarMapper {
         calendarDTO.isToday = date.isEqual(today)
     }
 
+    @Named("timeToLocalTime")
+    fun timeToLocalTime(time: java.sql.Time): java.time.LocalTime {
+        return time.toLocalTime()
+    }
+
+    @Named("localTimeToTime")
+    fun localTimeToTime(localTime: java.time.LocalTime): java.sql.Time {
+        return java.sql.Time.valueOf(localTime)
+    }
+
     @Mapping(target = "amount", expression = "java(data.getAmount().toString())")
+    @Mapping(target = "time", source = "time", qualifiedByName = ["timeToLocalTime"])
     abstract fun urinationDatatoDTO(data: UrinationData): UrinationDataDTO
 
     @Mapping(target = "id", ignore = true )
     @Mapping(target = "calendarDay", ignore = true )
     @Mapping(target = "amount", expression = "java(LeakageLevel.Companion.from(data.getAmount()))")
+    @Mapping(target = "time", source = "time", qualifiedByName = ["localTimeToTime"])
     abstract fun urinationDataDTOtoEntity(data: UrinationDataDTO): UrinationData
 
     fun urinationDataListToDTO(data: List<UrinationData>?): List<UrinationDataDTO>?{

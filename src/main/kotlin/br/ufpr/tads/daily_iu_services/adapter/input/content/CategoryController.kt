@@ -17,29 +17,29 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v1/content/category")
-@Tag(name = "Category", description = "Endpoints for managing content categories")
+@Tag(name = "Categoria", description = "Endpoints para gerenciamento de categorias de conteúdo / exercício")
 class CategoryController(private val categoryService: CategoryService) {
 
     @PostMapping
-    @Operation(summary = "Create Category", description = "Create a new content category")
+    @Operation(summary = "Criar Categoria", description = "Cria uma nova categoria de conteúdo")
     fun createCategory(@RequestBody @Valid request: CategoryDTO): ResponseEntity<CategoryDTO> {
         return ResponseEntity.status(201).body(categoryService.createCategory(request))
     }
 
     @GetMapping
-    @Operation(summary = "Get All Categories", description = "Retrieve all content categories")
+    @Operation(summary = "Buscar Todas Categorias", description = "Recupera todas as categorias de conteúdo")
     fun getAllCategories(): ResponseEntity<List<CategoryDTO>> {
         return ResponseEntity.ok(categoryService.getAllCategories())
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update Category", description = "Update an existing content category by ID")
+    @Operation(summary = "Atualizar Categoria", description = "Atualiza uma categoria de conteúdo existente pelo ID")
     fun updateCategory(@PathVariable id: Long, @RequestBody @Valid request: CategoryDTO): ResponseEntity<CategoryDTO> {
         return ResponseEntity.ok(categoryService.updateCategory(id, request))
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete Category", description = "Delete a content category by ID")
+    @Operation(summary = "Excluir Categoria", description = "Exclui uma categoria de conteúdo pelo ID")
     fun deleteCategory(@PathVariable id: Long): ResponseEntity<Void> {
         categoryService.deleteCategory(id)
         return ResponseEntity.noContent().build()

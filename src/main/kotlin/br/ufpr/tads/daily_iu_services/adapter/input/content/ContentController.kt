@@ -5,9 +5,11 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentRepostDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentUpdateDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.LikeToggleDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ReportContentDTO
 import br.ufpr.tads.daily_iu_services.domain.service.ContentService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -24,17 +26,17 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v1/content")
-@Tag(name = "Content", description = "Endpoints for managing the social media content")
+@Tag(name = "Conteúdo", description = "Endpoints para gerenciar o conteúdo da rede social")
 class ContentController(private val service: ContentService) {
 
     @PostMapping
-    @Operation(summary = "Create Content", description = "Create a new content post")
+    @Operation(summary = "Criar Conteúdo", description = "Criar uma nova publicação de conteúdo")
     fun createContent(@RequestBody @Valid request: ContentCreatorDTO): ResponseEntity<ContentDTO> {
         return ResponseEntity.ok(service.createContent(request))
     }
 
     @PostMapping("/repost/{id}")
-    @Operation(summary = "Repost Content", description = "Repost an existing content post by ID")
+    @Operation(summary = "Repostar Conteúdo", description = "Repostar uma publicação de conteúdo existente pelo ID")
     fun repostContent(
         @PathVariable("id") id: Long,
         @RequestBody @Valid request: ContentRepostDTO): ResponseEntity<ContentDTO> {
@@ -42,13 +44,13 @@ class ContentController(private val service: ContentService) {
     }
 
     @GetMapping
-    @Operation(summary = "Get All Contents", description = "Retrieve all content posts for a user")
-    fun getContents(@RequestHeader("x-user-id") userId: Long): ResponseEntity<List<ContentSimpleDTO>> {
+    @Operation(summary = "Obter Conteúdos", description = "Recupera publicações de conteúdo para um usuário. Se o cabeçalho 'x-profile' for verdadeiro, busca conteúdos específicos do perfil com base no ID do usuário, caso contrário, busca publicações recomendadas para o usuário.")
+    fun getContents(@RequestHeader("x-user-id") userId: Long, @RequestHeader("x-profile", required = false) profile: Boolean): ResponseEntity<List<ContentSimpleDTO>> {
         return ResponseEntity.ok(service.getContents(userId))
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get Content by ID", description = "Retrieve a specific content post by its ID")
+    @Operation(summary = "Obter Conteúdo por ID", description = "Recupera uma publicação de conteúdo específica pelo seu ID")
     fun getContentById(
         @PathVariable("id") id: Long,
         @RequestHeader("x-user-id") userId: Long
@@ -57,7 +59,7 @@ class ContentController(private val service: ContentService) {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update Content", description = "Update an existing content post by ID")
+    @Operation(summary = "Atualizar Conteúdo", description = "Atualiza uma publicação de conteúdo existente pelo ID")
     fun updateContent(
         @PathVariable("id") id: Long,
         @RequestBody @Valid request: ContentUpdateDTO,
@@ -67,16 +69,34 @@ class ContentController(private val service: ContentService) {
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Like/Unlike Content", description = "Toggle like status for a specific content post by its ID")
-    fun toggleLikeContent(@PathVariable("id") id: Long, @RequestBody toggle: LikeToggleDTO): ResponseEntity<Void> {
+    @Operation(summary = "Curtir/Descurtir Conteúdo", description = "Alterna o status de curtida para uma publicação de conteúdo específica pelo seu ID")
+    @ApiResponse(responseCode = "204", description = "Operação realizada com sucesso, sem conteúdo na resposta")
+    fun toggleLikeContent(@PathVariable("id") id: Long, @RequestBody toggle: ToggleDTO): ResponseEntity<Void> {
         service.toggleLikeContent(id, toggle)
         return ResponseEntity.noContent().build()
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete Content", description = "Delete a content post by its ID")
+    @Operation(summary = "Deletar Conteúdo", description = "Deleta uma publicação de conteúdo pelo seu ID")
+    @ApiResponse(responseCode = "204", description = "Conteúdo deletado com sucesso, sem conteúdo na resposta")
     fun deleteContent(@PathVariable("id") id: Long): ResponseEntity<Void> {
         service.deleteContent(id)
         return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/{id}/report")
+    @Operation(summary = "Reportar Conteúdo", description = "Reportar uma publicação de conteúdo pelo seu ID")
+    @ApiResponse(responseCode = "204", description = "Report enviado com sucesso, sem conteúdo na resposta")
+    fun reportContent(@PathVariable("id") id: Long, @RequestBody request: ReportContentDTO): ResponseEntity<Void> {
+        TODO("Implement report content functionality")
+        //return ResponseEntity.noContent().build()
+    }
+
+    @PatchMapping("/{id}/save")
+    @Operation(summary = "Salvar/Remover dos Salvos", description = "Alterna o status de salvo para uma publicação de conteúdo específica pelo seu ID")
+    @ApiResponse(responseCode = "204", description = "Operação realizada com sucesso, sem conteúdo na resposta")
+    fun toggleSaveContent(@PathVariable("id") id: Long, @RequestBody toggle: ToggleDTO): ResponseEntity<Void> {
+        TODO("Implement save/unsave content functionality")
+        //return ResponseEntity.noContent().build()
     }
 }

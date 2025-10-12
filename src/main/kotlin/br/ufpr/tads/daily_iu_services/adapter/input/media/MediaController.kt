@@ -13,11 +13,11 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/v1/media")
-@Tag(name = "Media", description = "Endpoints for managing media uploads")
+@Tag(name = "Mídia", description = "Endpoints para gerenciar uploads de mídia")
 class MediaController(private val mediaService: MediaService) {
 
     @PostMapping("/upload")
-    @Operation(summary = "Upload Media", description = "Upload one or more media files")
+    @Operation(summary = "Enviar Mídia", description = "Envie um ou mais arquivos de mídia")
     fun uploadMedia(@RequestParam("files") files: Array<MultipartFile>): ResponseEntity<List<MediaCreateDTO>> {
         return ResponseEntity.ok(mediaService.upload(files))
     }

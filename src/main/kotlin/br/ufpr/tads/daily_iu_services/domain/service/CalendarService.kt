@@ -55,8 +55,7 @@ class CalendarService(
                 dayTitle = dayTitle
             )
 
-            data = CalendarMapper.INSTANCE
-                .urinationDataDTOListToEntity(request.urinationData)
+            data = CalendarMapper.INSTANCE.urinationDataDTOListToEntity(request.urinationData)
         } else {
             data = processUrinationData(
                 request.urinationData,

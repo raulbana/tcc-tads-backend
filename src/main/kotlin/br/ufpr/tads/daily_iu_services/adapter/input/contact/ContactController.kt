@@ -12,12 +12,18 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v1/contact")
-@Tag(name = "Contact", description = "Endpoints for contact form submissions")
+@Tag(name = "Contato", description = "Endpoints relacionados ao contato e suporte")
 class ContactController(private val service: ContactService) {
-    @PostMapping
-    @Operation(summary = "Send contact email", description = "Send an email using the contact form")
+    @PostMapping("/support")
+    @Operation(summary = "Enviar e-mail de contato", description = "Envia um e-mail usando o formulário de contato")
     fun sendEmail(@RequestBody email: ContactDTO): ResponseEntity<Void> {
         service.sendEmail(email)
         return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/professional-request")
+    @Operation(summary = "Enviar e-mail de solicitação profissional", description = "Envia um e-mail de solicitação profissional usando o formulário de contato")
+    fun sendProfessionalRequestEmail(): ResponseEntity<Void> {
+        TODO("Not yet implemented")
     }
 }

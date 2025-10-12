@@ -1,6 +1,6 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
 
-data class LikeToggleDTO(
+data class ToggleDTO (
     val userId: Long,
-    val like: Boolean
+    val control: Boolean
 )

@@ -2,7 +2,7 @@ package br.ufpr.tads.daily_iu_services.domain.service
 
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.CommentCreatorDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.CommentDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.LikeToggleDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
 import br.ufpr.tads.daily_iu_services.adapter.output.content.CommentRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentRepository
@@ -93,12 +93,12 @@ class CommentService(
         return ContentMapper.INSTANCE.commentToDTO(savedComment, userId)
     }
 
-    fun toggleLikeComment(commentId: Long, toggleDTO: LikeToggleDTO) {
+    fun toggleLikeComment(commentId: Long, toggleDTO: ToggleDTO) {
         val comment = commentRepository.findById(commentId).orElseThrow {
             throw NotFoundException("Comentário com id $commentId não encontrado")
         }
 
-        if (toggleDTO.like) {
+        if (toggleDTO.control) {
             val alreadyLiked = comment.likes.any { it.userId == toggleDTO.userId }
             if (!alreadyLiked) {
                 comment.likes.add(CommentLikes(userId = toggleDTO.userId, comment = comment))

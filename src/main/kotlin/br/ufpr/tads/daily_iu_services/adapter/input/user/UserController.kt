@@ -14,32 +14,44 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v1/users")
-@Tag(name = "User", description = "Endpoints for managing user authentication and password recovery")
+@Tag(name = "Usuário", description = "Endpoints para gerenciar autenticação de usuário e recuperação de senha")
 class UserController(private val userService: UserService) {
 
     @PostMapping
-    @Operation(summary = "Create User", description = "Create a new user account")
+    @Operation(summary = "Criar Usuário", description = "Criar uma nova conta de usuário")
     fun createUser() {
         TODO("Not yet implemented")
     }
 
+    @PutMapping
+    @Operation(summary = "Atualizar Usuário", description = "Atualizar uma conta de usuário existente")
+    fun updateUser() {
+        TODO("Not yet implemented")
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar Usuário por ID", description = "Recupera os detalhes do usuário pelo ID do usuário")
+    fun getUserById(@PathVariable id: Long) {
+        TODO("Not yet implemented")
+    }
+
     @PostMapping("/login")
-    @Operation(summary = "User Login", description = "Authenticate a user and return a JWT token with user details")
+    @Operation(summary = "Login do Usuário", description = "Autentica um usuário e retorna um token JWT com os detalhes do usuário")
     fun login(@RequestBody @Valid request: LoginRequestDTO): ResponseEntity<LoginResponseDTO> {
         return ResponseEntity.ok(userService.login(request))
     }
 
     @PostMapping("/password/forgot")
-    @Operation(summary = "Initiate Password Reset", description = "Send an OTP to the user's email for password reset")
-    @ApiResponse(responseCode = "204", description = "OTP sent successfully")
+    @Operation(summary = "Iniciar redefinição de senha", description = "Envia um OTP para o e-mail do usuário para redefinição de senha")
+    @ApiResponse(responseCode = "204", description = "OTP enviado com sucesso")
     fun resetPassword(@RequestHeader("x-user-email") @Email email: String): ResponseEntity<Void> {
         userService.sendEmailOTP(email)
         return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/password/reset")
-    @Operation(summary = "Change Password", description = "Change the user's password using the OTP sent to their email")
-    @ApiResponse(responseCode = "204", description = "Password changed successfully")
+    @Operation(summary = "Alterar Senha", description = "Altera a senha do usuário utilizando o OTP enviado para o e-mail")
+    @ApiResponse(responseCode = "204", description = "Senha alterada com sucesso")
     fun changePassword(@RequestBody @Valid request: ChangePasswordDTO): ResponseEntity<Void> {
         userService.resetPassword(request)
         return ResponseEntity.noContent().build()
