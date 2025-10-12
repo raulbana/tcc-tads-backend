@@ -11,11 +11,11 @@ INSERT INTO question (externalId, text, type, required) VALUES
     'RADIO', 1);
 
 INSERT INTO question (externalId, text, type, required) VALUES
-('q3_frequency', 'Com que frequência você urina?',
+('q3_frequency', 'Com que frequência você perde urina?',
     'RADIO', 1);
 
 INSERT INTO question (externalId, text, type, required) VALUES
-('q4_amount', 'Como você quantifica sua perda de urina?',
+('q4_amount', 'Gostaríamos de saber a quantidade de urina que você pensa que perde (Assinale a alternativa que melhor representa a sua percepção)',
     'RADIO', 1);
 
 INSERT INTO question (externalId, text, type, required, minValue, maxValue, step) VALUES
@@ -55,11 +55,12 @@ GO
 INSERT INTO questionOption (questionId, label, textValue) VALUES
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Nunca', '0'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Antes de chegar ao banheiro', '1'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco antes de terminar de urinar e/ou após urinar', '2'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando tusso ou espirro', '2'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando estou dormindo', '3'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando estou realizando atividades físicas', '4'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando terminei de urinar e estou vestindo', '5'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco o tempo todo', '6');
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando terminei de urinar e estou me vestindo', '5'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco sem razão aparente', '6'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco o tempo todo', '7');
 GO
 
 --//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
@@ -71,9 +72,9 @@ INSERT INTO credential (passwordHash, salt) VALUES
 GO
 
 
-INSERT INTO patientProfile (birthDate, gender) VALUES
-('1980-05-15', 'M'),
-('1990-10-20', 'F');
+INSERT INTO patientProfile (birthDate, gender, iciq3answer, iciq4answer, iciq5answer, iciqScore, urinationLoss) VALUES
+('1980-05-15', 'M', 0, 0, 3, 3, '1,2,3'),
+('1990-10-20', 'F', 2, 2, 6, 10, '2,3,4,5');
 GO
 
 INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalendarSchedule, reminderWorkout, reminderWorkoutSchedule, encouragingMessages, workoutMediaType) VALUES

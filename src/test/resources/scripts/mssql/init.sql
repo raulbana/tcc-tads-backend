@@ -15,6 +15,11 @@ CREATE TABLE patientProfile (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     birthDate DATE NOT NULL,
     gender NVARCHAR(10) NOT NULL,
+    iciq3answer INT NOT NULL,
+    iciq4answer INT NOT NULL,
+    iciq5answer INT NOT NULL,
+    iciqScore INT NOT NULL,
+    urinationLoss NVARCHAR(26) NOT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NOT NULL DEFAULT GETDATE()
 );
@@ -33,6 +38,18 @@ CREATE TABLE preferences (
 );
 GO
 
+CREATE TABLE role (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    description NVARCHAR(50) NOT NULL,
+    permissionLevel INT NOT NULL,
+    reason NVARCHAR(255) NOT NULL,
+    hasDocument BIT NOT NULL DEFAULT 0,
+    documentType NVARCHAR(50),
+    documentValue NVARCHAR(255),
+    conceivedBy BIGINT NOT NULL,
+    conceivedAt DATETIME2 NOT NULL DEFAULT GETDATE()
+);
+
 -- Tabela principal de usuários
 CREATE TABLE appUser (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -42,18 +59,27 @@ CREATE TABLE appUser (
     credentialId BIGINT NOT NULL,
     patientProfileId BIGINT NOT NULL,
     preferencesId BIGINT NOT NULL,
+    roleId INT DEFAULT NULL,
+    blocked BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (credentialId) REFERENCES credential(id),
     FOREIGN KEY (patientProfileId) REFERENCES patientProfile(id),
-    FOREIGN KEY (preferencesId) REFERENCES preferences(id)
+    FOREIGN KEY (preferencesId) REFERENCES preferences(id),
+    FOREIGN KEY (roleId) REFERENCES role(id)
 );
 GO
+
+ALTER TABLE role
+ADD CONSTRAINT FK_ConceivedBy FOREIGN KEY (conceivedBy) REFERENCES appUser(id);
+GO
+
+-- Tabela para armazenar códigos OTP para recuperação de senha
 
 CREATE TABLE OTP (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     userId BIGINT NOT NULL,
     code NVARCHAR(255) NOT NULL,
     expirationTime BIGINT NOT NULL,
-    used BIT NOT NULL DEFAULT 0
+    used BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (userId) REFERENCES appUser(id)
 );
 GO
@@ -113,10 +139,8 @@ CREATE TABLE urinationData (
 GO
 
 --//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-
--- Tabela de exercícios e conteúdos de treino
-
-CREATE TABlE media (
+-- Tabela para armazenar mídias (imagens, vídeos, etc.)
+CREATE TABLE media (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     url NVARCHAR(255) NOT NULL,
     contentType NVARCHAR(10) NOT NULL,
@@ -126,14 +150,43 @@ CREATE TABlE media (
 );
 GO
 
+-- Tabela de exercícios e planos de treino
+
+CREATE TABLE exerciseAttribute (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL UNIQUE,
+    type NVARCHAR(50) NOT NULL CHECK (type IN ('BENEFIT', 'CONTRAINDICATION')),
+    description NVARCHAR(255) DEFAULT NULL
+);
+GO
+
+CREATE TABLE exerciseCategory (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL UNIQUE,
+    description NVARCHAR(255) DEFAULT NULL
+);
+GO
+
 CREATE TABLE exercise (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    title NVARCHAR(255) NOT NULL,
-    description NVARCHAR(MAX),
-    category INT NOT NULL,
-    intensityLevel INT NOT NULL,
+    title NVARCHAR(100) NOT NULL,
+    categoryId INT NOT NULL,
+    instructions NVARCHAR(MAX) NOT NULL,
+    repetitions INT NOT NULL,
+    sets INT NOT NULL,
+    restTime INT NOT NULL,
+    duration INT NOT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
-    updatedAt DATETIME2 NOT NULL DEFAULT GETDATE()
+    FOREIGN KEY (categoryId) REFERENCES exerciseCategory(id)
+);
+GO
+
+CREATE TABLE exerciseExerciseAttribute (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    exerciseId BIGINT NOT NULL,
+    attributeId INT NOT NULL,
+    FOREIGN KEY (exerciseId) REFERENCES exercise(id),
+    FOREIGN KEY (attributeId) REFERENCES exerciseAttribute(id)
 );
 GO
 
@@ -146,16 +199,77 @@ CREATE TABLE exerciseMedia (
 );
 GO
 
-CREATE TABLE exerciseFeedback (
+CREATE TABLE workout (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL,
+    description NVARCHAR(MAX) NOT NULL,
+    totalDuration INT NOT NULL,
+    difficultyLevel NVARCHAR(50) NOT NULL,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE workoutExercise (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    workoutId BIGINT NOT NULL,
     exerciseId BIGINT NOT NULL,
+    exerciseOrder INT NOT NULL,
+    FOREIGN KEY (workoutId) REFERENCES workout(id),
+    FOREIGN KEY (exerciseId) REFERENCES exercise(id)
+);
+GO
+
+CREATE TABLE workoutPlan (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    description NVARCHAR(MAX) DEFAULT NULL,
+    daysPerWeek INT NOT NULL,
+    totalWeeks INT NOT NULL,
+    iciqScoreRecommendation INT NOT NULL,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE workoutPlanWorkout (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    workoutPlanId BIGINT NOT NULL,
+    workoutId BIGINT NOT NULL,
+    workoutOrder INT NOT NULL,
+    FOREIGN KEY (workoutPlanId) REFERENCES workoutPlan(id),
+    FOREIGN KEY (workoutId) REFERENCES workout(id)
+);
+GO
+
+CREATE TABLE userWorkoutPlan (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
     userId BIGINT NOT NULL,
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    comment NVARCHAR(MAX),
+    workoutPlanId BIGINT NOT NULL,
+    startDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+    endDate DATETIME2 DEFAULT NULL,
+    progress INT DEFAULT NULL,
+    currentWeek INT NOT NULL DEFAULT 1,
+    nextWorkout INT DEFAULT NULL,
+    lastWorkoutDate DATETIME2 DEFAULT NULL,
+    completed BIT NOT NULL DEFAULT 0,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
-    FOREIGN KEY (exerciseId) REFERENCES exercise(id),
+    updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    UNIQUE (userId, workoutPlanId),
+    FOREIGN KEY (userId) REFERENCES appUser(id),
+    FOREIGN KEY (workoutPlanId) REFERENCES workoutPlan(id)
+);
+GO
+
+CREATE TABLE workoutFeedback (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    workoutId BIGINT NOT NULL,
+    userId BIGINT NOT NULL,
+    evaluation NVARCHAR(20) NOT NULL,
+    rating INT NOT NULL,
+    comments NVARCHAR(MAX),
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (workoutId) REFERENCES workout(id),
     FOREIGN KEY (userId) REFERENCES appUser(id)
 );
+GO
 
 -- Tabela de conteúdos com funcionalidades de rede social
 
@@ -179,6 +293,7 @@ CREATE TABLE content (
     repost BIT NOT NULL DEFAULT 0,
     repostFromcontentId BIGINT DEFAULT NULL,
     repostByAuthorId BIGINT DEFAULT NULL,
+    visible BIT NOT NULL DEFAULT 1,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (authorId) REFERENCES appUser(id),
@@ -226,5 +341,26 @@ CREATE TABLE contentMedia (
     mediaId BIGINT NOT NULL,
     FOREIGN KEY (contentId) REFERENCES content(id),
     FOREIGN KEY (mediaId) REFERENCES media(id)
+);
+GO
+
+CREATE TABLE savedContent (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    contentId BIGINT NOT NULL,
+    userId BIGINT NOT NULL,
+    savedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (contentId) REFERENCES content(id),
+    FOREIGN KEY (userId) REFERENCES appUser(id)
+);
+GO
+
+CREATE TABLE reports (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    contentId BIGINT NOT NULL,
+    reportedByUserId BIGINT NOT NULL,
+    reason NVARCHAR(MAX) NOT NULL,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (contentId) REFERENCES content(id),
+    FOREIGN KEY (reportedByUserId) REFERENCES appUser(id)
 );
 GO
