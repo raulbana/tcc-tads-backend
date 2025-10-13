@@ -48,6 +48,8 @@ data class Content(
     @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
     val media: MutableList<ContentMedia> = mutableListOf(),
 
+    var visible: Boolean = true,
+
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime = LocalDateTime.now()
 )

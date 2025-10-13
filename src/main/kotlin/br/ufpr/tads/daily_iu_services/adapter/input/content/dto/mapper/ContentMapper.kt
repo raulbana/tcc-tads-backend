@@ -1,9 +1,8 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper
 
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.AuthorDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.CategoryDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentCategoryDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.CommentDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentCreatorDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaDTO
@@ -19,7 +18,6 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
-import java.time.LocalDateTime
 
 @Mapper
 abstract class ContentMapper {
@@ -100,7 +98,7 @@ abstract class ContentMapper {
     @Mapping(target = "repliesCount", source = "comment.replies", qualifiedByName = ["countSize"])
     abstract fun commentToDTO(comment: Comment, userId: Long): CommentDTO
 
-    abstract fun categoryToDTO(entity: Category): CategoryDTO
+    abstract fun categoryToDTO(entity: Category): ContentCategoryDTO
 
-    abstract fun categoryDTOToEntity(dto: CategoryDTO): Category
+    abstract fun categoryDTOToEntity(dto: ContentCategoryDTO): Category
 }

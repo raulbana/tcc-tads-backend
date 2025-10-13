@@ -22,5 +22,12 @@ class User (
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "preferencesId", referencedColumnName = "id")
-    val preferences: Preferences
+    val preferences: Preferences,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "roleId", referencedColumnName = "id")
+    var role: Role,
+
+    var strikes: Int = 0,
+    var blocked: Boolean = false
 )

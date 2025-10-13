@@ -1,6 +1,7 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.preferences
 
 import br.ufpr.tads.daily_iu_services.adapter.input.preferences.dto.AccessibilityDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.preferences.dto.NotificationsDTO
 import br.ufpr.tads.daily_iu_services.domain.service.PreferencesService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -28,7 +29,7 @@ class PreferencesController(private val service: PreferencesService) {
     @Operation(summary = "Definir Preferências de Acessibilidade", description = "Atualiza as preferências de acessibilidade de um usuário")
     fun setAccessibilityPreferences(
         @RequestHeader("x-user-id") userId: Long,
-        @RequestBody() preferences: AccessibilityDTO
+        @RequestBody preferences: AccessibilityDTO
     ): ResponseEntity<Void> {
         service.setAccessibilityPreferences(userId, preferences)
         return ResponseEntity.noContent().build()
@@ -36,7 +37,7 @@ class PreferencesController(private val service: PreferencesService) {
 
     @GetMapping("/notifications")
     @Operation(summary = "Obter Preferências de Notificação", description = "Recupera as preferências de notificação de um usuário")
-    fun getNotificationPreferences(@RequestHeader("x-user-id") userId: Long): ResponseEntity<Map<String, Boolean>> {
+    fun getNotificationPreferences(@RequestHeader("x-user-id") userId: Long): ResponseEntity<NotificationsDTO> {
         TODO("Not implemented yet")
     }
 
@@ -44,7 +45,7 @@ class PreferencesController(private val service: PreferencesService) {
     @Operation(summary = "Definir Preferências de Notificação", description = "Atualiza as preferências de notificação de um usuário")
     fun setNotificationPreferences(
         @RequestHeader("x-user-id") userId: Long,
-        @RequestBody() preferences: Map<String, Boolean>
+        @RequestBody() preferences: NotificationsDTO
     ): ResponseEntity<Void> {
         TODO("Not implemented yet")
     }

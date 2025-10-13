@@ -81,10 +81,15 @@ INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalend
 (0, 0, 1, '09:00', 1, '18:00', 1, 'VIDEO'),
 (1, 1, 0, NULL, 0, NULL, 1, 'IMAGE');
 
+INSERT INTO role(description, permissionLevel, reason, hasDocument) VALUES
+('Usuário comum', 1, 'Acesso padrão ao aplicativo.', 0),
+('Usuário comum', 1, 'Acesso padrão ao aplicativo.', 0),
+('Administrador', 3, 'Acesso total ao sistema para gerenciamento e manutenção.', 0);
+
 -- Inserindo usuários
-INSERT INTO appUser (name, email, credentialId, patientProfileId, preferencesId) VALUES
-('Usuário 1', 'usuario1@example.com', 1, 1, 1),
-('Usuária 2', 'usuario2@example.com', 2, 2, 2);
+INSERT INTO appUser (name, email, credentialId, patientProfileId, preferencesId, roleId) VALUES
+('Usuário 1', 'usuario1@example.com', 1, 1, 1, 1),
+('Usuária 2', 'usuario2@example.com', 2, 2, 2, 2);
 GO
 
 -- Inserindo dados do calendário

@@ -5,15 +5,21 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentRepostDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentUpdateDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ReportContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
 import br.ufpr.tads.daily_iu_services.adapter.output.content.CategoryRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentReportsRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.content.SavedContentRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.media.MediaRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.user.MailClient
 import br.ufpr.tads.daily_iu_services.adapter.output.user.UserRepository
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Content
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
+import br.ufpr.tads.daily_iu_services.domain.entity.content.Report
+import br.ufpr.tads.daily_iu_services.domain.entity.content.SavedContent
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
@@ -24,7 +30,10 @@ class ContentService(
     private val contentRepository: ContentRepository,
     private val categoryRepository: CategoryRepository,
     private val mediaRepository: MediaRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val savedContentRepository: SavedContentRepository,
+    private val reportsRepository: ContentReportsRepository,
+    private val mailClient: MailClient
 ) {
 
     fun getContents(userId: Long): List<ContentSimpleDTO> {
@@ -175,6 +184,66 @@ class ContentService(
             val like = content.likes.firstOrNull { it.userId == toggle.userId }
             if (like != null) {
                 content.likes.remove(like)
+                contentRepository.save(content)
+            }
+        }
+    }
+
+    fun toggleSaveContent(contentId: Long, toggle: ToggleDTO) {
+        val content = contentRepository.findById(contentId).orElseThrow {
+            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        }
+        if (toggle.control) {
+            val alreadySaved = savedContentRepository.findByUserIdAndContentId(toggle.userId, contentId)
+            if (alreadySaved == null) {
+                savedContentRepository.save(
+                    SavedContent(
+                        content = content,
+                        user = userRepository.findById(toggle.userId).orElseThrow {
+                            throw NotFoundException("Usuário com id ${toggle.userId} não encontrado")
+                        }
+                    )
+                )
+            }
+        } else {
+            val savedContent = savedContentRepository.findByUserIdAndContentId(toggle.userId, contentId)
+            if (savedContent != null) {
+                savedContentRepository.delete(savedContent)
+            }
+        }
+    }
+
+    fun listSavedContents(userId: Long): List<ContentSimpleDTO> {
+        val savedContents = savedContentRepository.findByUserIdAndContent_VisibleTrue(userId)
+        return savedContents.map { ContentMapper.INSTANCE.contentToSimpleDTO(it.content) }
+    }
+
+    fun reportContent(contentId: Long, request: ReportContentDTO) {
+        val content = contentRepository.findById(contentId).orElseThrow {
+            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        }
+        val reportedByUser = userRepository.findById(request.reporterId).orElseThrow {
+            throw NotFoundException("Usuário com id ${request.reporterId} não encontrado")
+        }
+
+        if (!reportsRepository.existsByContentIdAndReportedByUserIdAndValidTrue(contentId, request.reporterId)) {
+            val report = Report(
+                content = content,
+                reportedByUser = reportedByUser,
+                reason = request.reason,
+                createdAt = LocalDateTime.now()
+            )
+
+            reportsRepository.save(report)
+
+            // ***************** Início da lógica de AÇÃO após certos limites de reports *****************
+            val contentReportThreshold = 5L
+
+            val reportCount = reportsRepository.countByContentIdAndValidTrue(contentId)
+            if (reportCount >= contentReportThreshold) {
+                mailClient.sendContentShutdownWarning(content, reportCount)
+
+                content.visible = false
                 contentRepository.save(content)
             }
         }

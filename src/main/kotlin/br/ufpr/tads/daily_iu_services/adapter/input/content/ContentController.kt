@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,11 +32,12 @@ class ContentController(private val service: ContentService) {
 
     @PostMapping
     @Operation(summary = "Criar Conteúdo", description = "Criar uma nova publicação de conteúdo")
+    @ApiResponse(responseCode = "201", description = "Conteúdo criado com sucesso")
     fun createContent(@RequestBody @Valid request: ContentCreatorDTO): ResponseEntity<ContentDTO> {
-        return ResponseEntity.ok(service.createContent(request))
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createContent(request))
     }
 
-    @PostMapping("/repost/{id}")
+    @PostMapping("/{id}/repost")
     @Operation(summary = "Repostar Conteúdo", description = "Repostar uma publicação de conteúdo existente pelo ID")
     fun repostContent(
         @PathVariable("id") id: Long,
@@ -88,15 +90,21 @@ class ContentController(private val service: ContentService) {
     @Operation(summary = "Reportar Conteúdo", description = "Reportar uma publicação de conteúdo pelo seu ID")
     @ApiResponse(responseCode = "204", description = "Report enviado com sucesso, sem conteúdo na resposta")
     fun reportContent(@PathVariable("id") id: Long, @RequestBody request: ReportContentDTO): ResponseEntity<Void> {
-        TODO("Implement report content functionality")
-        //return ResponseEntity.noContent().build()
+        service.reportContent(id, request)
+        return ResponseEntity.noContent().build()
     }
 
     @PatchMapping("/{id}/save")
     @Operation(summary = "Salvar/Remover dos Salvos", description = "Alterna o status de salvo para uma publicação de conteúdo específica pelo seu ID")
     @ApiResponse(responseCode = "204", description = "Operação realizada com sucesso, sem conteúdo na resposta")
     fun toggleSaveContent(@PathVariable("id") id: Long, @RequestBody toggle: ToggleDTO): ResponseEntity<Void> {
-        TODO("Implement save/unsave content functionality")
-        //return ResponseEntity.noContent().build()
+        service.toggleSaveContent(id, toggle)
+        return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/saved")
+    @Operation(summary = "Obter Conteúdos salvos", description = "Recupera publicações de conteúdo salvos por um usuário.")
+    fun getSavedContents(@RequestHeader("x-user-id") userId: Long): ResponseEntity<List<ContentSimpleDTO>> {
+        return ResponseEntity.ok(service.listSavedContents(userId))
     }
 }

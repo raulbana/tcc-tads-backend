@@ -6,6 +6,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.domain.service.CommentService
 import com.azure.core.annotation.QueryParam
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -27,6 +28,7 @@ class CommentController(private val service: CommentService) {
 
     @PostMapping
     @Operation(summary = "Criar Comentário", description = "Cria um novo comentário em um conteúdo")
+    @ApiResponse(responseCode = "201", description = "Comentário criado com sucesso")
     fun createComment(@RequestBody request: CommentCreatorDTO): ResponseEntity<CommentDTO> {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createComment(request))
     }
@@ -63,13 +65,15 @@ class CommentController(private val service: CommentService) {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Curtir/Descurtir Comentário", description = "Alterna o status de curtida para um comentário específico pelo seu ID")
+    @ApiResponse(responseCode = "204", description = "Status de curtida alterado com sucesso")
     fun likeComment(@PathVariable("id") id: Long, @RequestBody toggle: ToggleDTO): ResponseEntity<Void> {
         service.toggleLikeComment(id, toggle)
-        return ResponseEntity.ok().build()
+        return ResponseEntity.noContent().build()
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar Comentário", description = "Deleta um comentário pelo seu ID")
+    @ApiResponse(responseCode = "204", description = "Comentário deletado com sucesso")
     fun deleteComment(@PathVariable("id") id: Long): ResponseEntity<Void> {
         service.deleteComment(id)
         return ResponseEntity.noContent().build()

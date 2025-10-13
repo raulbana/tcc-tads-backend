@@ -46,7 +46,7 @@ CREATE TABLE role (
     hasDocument BIT NOT NULL DEFAULT 0,
     documentType NVARCHAR(50),
     documentValue NVARCHAR(255),
-    conceivedBy BIGINT NOT NULL,
+    conceivedBy BIGINT DEFAULT NULL,
     conceivedAt DATETIME2 NOT NULL DEFAULT GETDATE()
 );
 
@@ -59,7 +59,8 @@ CREATE TABLE appUser (
     credentialId BIGINT NOT NULL,
     patientProfileId BIGINT NOT NULL,
     preferencesId BIGINT NOT NULL,
-    roleId INT DEFAULT NULL,
+    roleId INT NOT NULL,
+    strikes INT NOT NULL DEFAULT 0,
     blocked BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (credentialId) REFERENCES credential(id),
     FOREIGN KEY (patientProfileId) REFERENCES patientProfile(id),
@@ -354,11 +355,12 @@ CREATE TABLE savedContent (
 );
 GO
 
-CREATE TABLE reports (
+CREATE TABLE report (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     contentId BIGINT NOT NULL,
     reportedByUserId BIGINT NOT NULL,
     reason NVARCHAR(MAX) NOT NULL,
+    valid BIT NOT NULL DEFAULT 1,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (contentId) REFERENCES content(id),
     FOREIGN KEY (reportedByUserId) REFERENCES appUser(id)

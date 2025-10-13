@@ -1,6 +1,8 @@
 package br.ufpr.tads.daily_iu_services.adapter.output.user
 
 import br.ufpr.tads.daily_iu_services.adapter.input.contact.dto.ContactDTO
+import br.ufpr.tads.daily_iu_services.domain.entity.content.Content
+import br.ufpr.tads.daily_iu_services.domain.entity.content.Report
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.SimpleMailMessage
@@ -34,6 +36,28 @@ class MailClient(private val mailSender: JavaMailSender) {
         message.setTo(to)
         message.subject = "Daily IU - Código OTP"
         message.text = "Seu código OTP é: ${otp.auxCode}. Ele é válido por 5 minutos."
+
+        mailSender.send(message)
+    }
+
+    fun sendContentShutdownWarning(content: Content, reportCount: Long) {
+        val message = SimpleMailMessage()
+        message.from = noreplyEmail
+        message.setTo(content.author.email)
+        message.setCc(supportEmail)
+        message.subject = "Daily IU - Aviso de remoção de conteúdo"
+        message.text = "Sua publicação com título \"${content.title}\" recebeu $reportCount denúncias e está sob revisão. Durante esse período, a publicação será ocultada da plataforma. Por favor, revise nossas diretrizes comunitárias para evitar futuras remoções."
+
+        mailSender.send(message)
+    }
+
+    fun sendUserBanWarning(userEmail: String, reportCount: Long) {
+        val message = SimpleMailMessage()
+        message.from = noreplyEmail
+        message.setTo(userEmail)
+        message.setCc(supportEmail)
+        message.subject = "Daily IU - Aviso de banimento de usuário"
+        message.text = "Sua conta recebeu $reportCount denúncias e está sob revisão. Durante esse período, sua conta será temporariamente suspensa. Por favor, revise nossas diretrizes comunitárias para evitar futuras suspensões."
 
         mailSender.send(message)
     }
