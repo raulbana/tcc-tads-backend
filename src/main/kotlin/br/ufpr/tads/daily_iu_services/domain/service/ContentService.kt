@@ -16,11 +16,13 @@ import br.ufpr.tads.daily_iu_services.adapter.output.media.MediaRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.MailClient
 import br.ufpr.tads.daily_iu_services.adapter.output.user.UserRepository
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Content
+import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentContentCategory
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Report
 import br.ufpr.tads.daily_iu_services.domain.entity.content.SavedContent
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
+import br.ufpr.tads.daily_iu_services.exception.NotAllowedException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -57,10 +59,7 @@ class ContentService(
     }
 
     fun createContent(request: ContentCreatorDTO): ContentDTO {
-        val category = categoryRepository.findById(request.categoryId).orElseThrow {
-            throw NotFoundException("Categoria com id ${request.categoryId} não encontrada")
-        }
-
+        var auditable = false
         val author = userRepository.findById(request.authorId).orElseThrow {
             throw NotFoundException("Usuário com id ${request.authorId} não encontrado")
         }
@@ -70,10 +69,20 @@ class ContentService(
             description = request.description,
             subtitle = request.subtitle,
             subcontent = request.subcontent,
-            category = category,
             author = author,
             createdAt = LocalDateTime.now()
         )
+
+        val category = request.categoryIds.map {
+            categoryRepository.findById(it).orElseThrow {
+                throw NotFoundException("Categoria com id $it não encontrada")
+            }
+        }.map {
+            if (it.auditable) {
+                auditable = true
+            }
+            ContentContentCategory(content = content, category = it)
+        }.toMutableList()
 
         val medias = request.media
             .map { ContentMapper.INSTANCE.mediaDTOToEntity(it) }
@@ -81,9 +90,18 @@ class ContentService(
             .map { ContentMedia(content = content, media = it) }
 
         content.media.addAll(medias)
+        content.categories.addAll(category)
 
-        if (category.auditable) {
-            TODO("Implementar lógica de auditoria para categorias que necessitam de aprovação")
+        if (auditable) {
+            val authorPermission = author.role.permissionLevel
+            if (authorPermission < 2) {
+                throw NotAllowedException("Usuário com id ${request.authorId} não tem permissão para criar conteúdo auditável")
+            } else {
+                //content.visible = false
+                val result = contentRepository.save(content)
+                //mailClient.sendContentForAudit(result)
+                return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)
+            }
         } else {
             val result = contentRepository.save(content)
             return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)

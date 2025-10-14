@@ -10,6 +10,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.content.Category
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Comment
 import br.ufpr.tads.daily_iu_services.domain.entity.content.CommentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Content
+import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentContentCategory
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
@@ -28,7 +29,7 @@ abstract class ContentMapper {
 
     @Mapping(target = "author", source = "author", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "cover", source = "media", qualifiedByName = ["getCoverMedia"])
-    @Mapping(target = "category", source = "category", qualifiedByName = ["categoryToString"])
+    @Mapping(target = "categories", source = "categories", qualifiedByName = ["categoriesToString"])
     @Mapping(target= "isReposted", source = "repost")
     abstract fun contentToSimpleDTO(entity: Content): ContentSimpleDTO
 
@@ -37,7 +38,7 @@ abstract class ContentMapper {
     @Mapping(target = "description", source = "content.description")
     @Mapping(target = "subtitle", source = "content.subtitle")
     @Mapping(target = "subcontent", source = "content.subcontent")
-    @Mapping(target = "category", source = "content.category", qualifiedByName = ["categoryToString"])
+    @Mapping(target = "categories", source = "content.categories", qualifiedByName = ["categoriesToString"])
     @Mapping(target = "author", source = "content.author", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "cover", source = "content.media", qualifiedByName = ["getCoverMedia"])
     @Mapping(target = "media", source = "content.media", qualifiedByName = ["mediasToDTO"])
@@ -59,8 +60,8 @@ abstract class ContentMapper {
     @Named("getCoverMedia")
     fun getCoverMedia(mediaList: List<ContentMedia>) = mediaList.map { mediaToDTO(it) }.firstOrNull()
 
-    @Named("categoryToString")
-    fun categoryToString(category: Category) = category.name
+    @Named("categoriesToString")
+    fun categoriesToString(categories: List<ContentContentCategory>) = categories.map { it.category.name }
 
     @Named("countSize")
     fun countSize(list: List<Any>) = list.size

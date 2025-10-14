@@ -289,7 +289,6 @@ CREATE TABLE content (
     description NVARCHAR(MAX) NOT NULL,
     subtitle NVARCHAR(255),
     subContent NVARCHAR(MAX),
-    categoryId INT NOT NULL,
     authorId BIGINT,
     repost BIT NOT NULL DEFAULT 0,
     repostFromcontentId BIGINT DEFAULT NULL,
@@ -298,7 +297,15 @@ CREATE TABLE content (
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (authorId) REFERENCES appUser(id),
-    FOREIGN KEY (repostByAuthorId) REFERENCES appUser(id),
+    FOREIGN KEY (repostByAuthorId) REFERENCES appUser(id)
+);
+GO
+
+CREATE TABLE contentContentCategory (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    contentId BIGINT NOT NULL,
+    categoryId INT NOT NULL,
+    FOREIGN KEY (contentId) REFERENCES content(id),
     FOREIGN KEY (categoryId) REFERENCES contentCategory(id)
 );
 GO

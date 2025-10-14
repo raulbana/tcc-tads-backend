@@ -11,7 +11,7 @@ data class ContentDTO(
     val description: String,
     val subtitle: String?,
     val subcontent: String?,
-    val category: String,
+    val categories: List<String>,
     val author: AuthorDTO,
     val cover: MediaDTO?,
     val media: List<MediaDTO>,

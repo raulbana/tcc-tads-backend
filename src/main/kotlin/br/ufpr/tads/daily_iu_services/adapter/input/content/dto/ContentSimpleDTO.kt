@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 data class ContentSimpleDTO(
     val id: Long?,
     val title: String,
-    val category: String,
+    val categories: List<String>,
     val author: AuthorDTO,
     val cover: MediaDTO?,
     val isReposted: Boolean,

@@ -1,5 +1,6 @@
 package br.ufpr.tads.daily_iu_services.exception.handler
 
+import br.ufpr.tads.daily_iu_services.exception.NotAllowedException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import br.ufpr.tads.daily_iu_services.exception.domain.ExceptionOrigin
 import br.ufpr.tads.daily_iu_services.exception.domain.Message
@@ -32,6 +33,16 @@ class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 ExceptionOrigin.REQUEST.origin,
                 ex.message ?: "Recurso não encontrado")
+            )
+    }
+
+    @ExceptionHandler(NotAllowedException::class)
+    fun handleNotAllowedException(ex: NotAllowedException): ResponseEntity<Message> {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(Message(
+                HttpStatus.FORBIDDEN.value(),
+                ExceptionOrigin.REQUEST.origin,
+                ex.message ?: "Ação não permitida")
             )
     }
 

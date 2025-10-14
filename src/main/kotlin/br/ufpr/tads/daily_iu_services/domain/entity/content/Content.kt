@@ -24,9 +24,8 @@ data class Content(
     var subtitle: String?,
     var subcontent: String?,
 
-    @OneToOne
-    @JoinColumn(name = "categoryId", referencedColumnName = "id")
-    var category: Category,
+    @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val categories: MutableList<ContentContentCategory> = mutableListOf(),
 
     @ManyToOne
     @JoinColumn(name = "authorId", referencedColumnName = "id")
