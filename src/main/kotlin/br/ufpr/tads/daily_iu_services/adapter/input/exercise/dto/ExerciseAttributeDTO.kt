@@ -17,7 +17,6 @@ data class ExerciseAttributeDTO(
     val description: String,
 
     @field:NotNull
-    @field:Pattern(regexp = "^[1-2]$", message = "O tipo deve ser 1 (Benefício) ou 2 (Contraindicação)")
     @field:Schema(description = "Tipo do atributo: 1 - Benefício, 2 - Contraindicação")
-    val type: Long
+    val type: Int
 )
