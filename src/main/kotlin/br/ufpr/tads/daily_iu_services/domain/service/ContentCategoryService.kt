@@ -2,11 +2,11 @@ package br.ufpr.tads.daily_iu_services.domain.service
 
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentCategoryDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
-import br.ufpr.tads.daily_iu_services.adapter.output.content.CategoryRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentCategoryRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CategoryService(private val categoryRepository: CategoryRepository) {
+class ContentCategoryService(private val categoryRepository: ContentCategoryRepository) {
 
     fun createCategory(request: ContentCategoryDTO): ContentCategoryDTO {
         val category = ContentMapper.INSTANCE.categoryDTOToEntity(request)

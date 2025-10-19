@@ -1,7 +1,7 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.content
 
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentCategoryDTO
-import br.ufpr.tads.daily_iu_services.domain.service.CategoryService
+import br.ufpr.tads.daily_iu_services.domain.service.ContentCategoryService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/content/category")
 @Tag(name = "Categoria de Conteúdo", description = "Endpoints para gerenciamento de categorias de conteúdo")
-class ContentCategoryController(private val categoryService: CategoryService) {
+class ContentCategoryController(private val categoryService: ContentCategoryService) {
 
     @PostMapping
     @Operation(summary = "Criar Categoria", description = "Cria uma nova categoria de conteúdo")

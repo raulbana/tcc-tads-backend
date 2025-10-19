@@ -8,7 +8,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentUpdateDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ReportContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
-import br.ufpr.tads.daily_iu_services.adapter.output.content.CategoryRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentCategoryRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentReportsRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.SavedContentRepository
@@ -30,7 +30,7 @@ import java.time.LocalDateTime
 @Service
 class ContentService(
     private val contentRepository: ContentRepository,
-    private val categoryRepository: CategoryRepository,
+    private val categoryRepository: ContentCategoryRepository,
     private val mediaRepository: MediaRepository,
     private val userRepository: UserRepository,
     private val savedContentRepository: SavedContentRepository,

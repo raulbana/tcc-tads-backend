@@ -78,6 +78,7 @@ abstract class ContentMapper {
     @Named("getCommentLikeStatus")
     fun getCommentLikeStatus(likes: List<CommentLikes>, userId: Long) = likes.any { it.userId == userId}
 
+    @Mapping(target = "id", source = "media.id")
     @Mapping(target = "url", source = "media.url")
     @Mapping(target = "contentType", source = "media.contentType")
     @Mapping(target = "contentSize", source = "media.contentSize")
@@ -86,7 +87,6 @@ abstract class ContentMapper {
     abstract fun mediaToDTO(entity: ContentMedia): MediaDTO
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "id", ignore = true)
     abstract fun mediaDTOToEntity(dto: MediaDTO): Media
 
     @Mapping(target = "id", source = "comment.id")
