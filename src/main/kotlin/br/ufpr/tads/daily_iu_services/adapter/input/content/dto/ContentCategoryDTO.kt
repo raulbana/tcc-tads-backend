@@ -1,5 +1,6 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.jetbrains.annotations.NotNull
@@ -18,5 +19,6 @@ data class ContentCategoryDTO (
     @field:NotNull
     var auditable: Boolean,
 
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val createdAt: LocalDateTime?
 )

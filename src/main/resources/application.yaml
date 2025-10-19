@@ -12,6 +12,9 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     database-platform: org.hibernate.dialect.SQLServerDialect
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   mail:
     host: smtp.gmail.com
     port: 587
