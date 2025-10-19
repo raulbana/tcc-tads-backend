@@ -156,7 +156,7 @@ GO
 CREATE TABLE exerciseAttribute (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL UNIQUE,
-    type NVARCHAR(50) NOT NULL CHECK (type IN ('BENEFIT', 'CONTRAINDICATION')),
+    type NVARCHAR(50) NOT NULL,
     description NVARCHAR(255) DEFAULT NULL
 );
 GO
@@ -246,7 +246,8 @@ CREATE TABLE userWorkoutPlan (
     workoutPlanId BIGINT NOT NULL,
     startDate DATETIME2 NOT NULL DEFAULT GETDATE(),
     endDate DATETIME2 DEFAULT NULL,
-    progress INT DEFAULT NULL,
+    totalProgress INT DEFAULT NULL,
+    weekProgress INT DEFAULT NULL,
     currentWeek INT NOT NULL DEFAULT 1,
     nextWorkout INT DEFAULT NULL,
     lastWorkoutDate DATETIME2 DEFAULT NULL,
@@ -259,15 +260,17 @@ CREATE TABLE userWorkoutPlan (
 );
 GO
 
-CREATE TABLE workoutFeedback (
+CREATE TABLE exerciseFeedback (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     workoutId BIGINT NOT NULL,
+    exerciseId BIGINT NOT NULL,
     userId BIGINT NOT NULL,
     evaluation NVARCHAR(20) NOT NULL,
     rating INT NOT NULL,
     comments NVARCHAR(MAX),
-    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    completedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (workoutId) REFERENCES workout(id),
+    FOREIGN KEY (exerciseId) REFERENCES exercise(id),
     FOREIGN KEY (userId) REFERENCES appUser(id)
 );
 GO

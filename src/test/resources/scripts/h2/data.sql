@@ -12,7 +12,7 @@ INSERT INTO question (externalId, text, type, required) VALUES
     'RADIO', TRUE);
 
 INSERT INTO question (externalId, text, type, required) VALUES
-('q4_amount', 'Como você quantifica sua perda de urina?',
+('q4_amount', 'Gostaríamos de saber a quantidade de urina que você pensa que perde (Assinale a alternativa que melhor representa a sua percepção)',
     'RADIO', TRUE);
 
 INSERT INTO question (externalId, text, type, required, minValue, maxValue, step) VALUES
@@ -48,11 +48,12 @@ INSERT INTO questionOption (questionId, label, textValue) VALUES
 INSERT INTO questionOption (questionId, label, textValue) VALUES
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Nunca', '0'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Antes de chegar ao banheiro', '1'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco antes de terminar de urinar e/ou após urinar', '2'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando tusso ou espirro', '2'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando estou dormindo', '3'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando estou realizando atividades físicas', '4'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando terminei de urinar e estou vestindo', '5'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco o tempo todo', '6');
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando terminei de urinar e estou me vestindo', '5'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco sem razão aparente', '6'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco o tempo todo', '7');
 
 --//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 
@@ -61,18 +62,23 @@ INSERT INTO credential (passwordHash, salt) VALUES
 ('1thzHtxdZlMY1Eyy90PCHNPUkbetaYCC8JjWIAgmxvo=', 'DghbE3gLRofkyVuZZ37oQA=='),
 ('z943fyO/J1bjRnoXt7Segm2h2c6e6tuS/bHMlSCPZJs=', '1HCmqwTC12DzqNpVKdQ0Uw==');
 
-INSERT INTO patientProfile (birthDate, gender) VALUES
-('1980-05-15', 'M'),
-('1990-10-20', 'F');
+INSERT INTO patientProfile (birthDate, gender, iciq3answer, iciq4answer, iciq5answer, iciqScore, urinationLoss) VALUES
+('1980-05-15', 'M', 0, 0, 3, 3, '1,2,3'),
+('1990-10-20', 'F', 2, 2, 6, 10, '2,3,4,5');
 
 INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalendarSchedule, reminderWorkout, reminderWorkoutSchedule, encouragingMessages, workoutMediaType) VALUES
 (FALSE, FALSE, TRUE, '09:00', TRUE, '18:00', TRUE, 'VIDEO'),
 (TRUE, TRUE, FALSE, NULL, FALSE, NULL, TRUE, 'IMAGE');
 
--- Inserindo usuários
-INSERT INTO appUser (name, email, credentialId, patientProfileId, preferencesId) VALUES
-('Usuário 1', 'usuario1@example.com', 1, 1, 1),
-('Usuária 2', 'usuario2@example.com', 2, 2, 2);
+INSERT INTO role(description, permissionLevel, reason, hasDocument) VALUES
+('Usuário comum', 1, 'Acesso padrão ao aplicativo.', FALSE),
+('Usuário comum', 1, 'Acesso padrão ao aplicativo.', FALSE),
+('Administrador', 3, 'Acesso total ao sistema para gerenciamento e manutenção.', FALSE);
+
+-- Inserindo usuários (agora incluindo roleId)
+INSERT INTO appUser (name, email, credentialId, patientProfileId, preferencesId, roleId) VALUES
+('Usuário 1', 'usuario1@example.com', 1, 1, 1, 1),
+('Usuária 2', 'usuario2@example.com', 2, 2, 2, 2);
 
 --//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 
@@ -116,21 +122,13 @@ INSERT INTO urinationData (calendarDayId, timeValue, amount, leakage, reason, ur
 
 -- Inserindo dados da rede social
 
-INSERT INTO contentCategory (name, description, auditable) VALUES
-('Alimentação e Nutrição', 'Dicas de alimentos que ajudam na saúde do trato urinário, receitas funcionais, e orientações nutricionais.', FALSE),
-('Hábitos Saudáveis', 'Rotinas que favorecem o bem-estar, como exercícios físicos, sono, hidratação e autocuidado.', FALSE),
-('Dicas de Fisioterapia Pélvica', 'Conteúdos educativos sobre exercícios, técnicas e orientações fisioterapêuticas.', TRUE),
-('Depoimentos e Histórias Reais', 'Espaço para relatos de superação, experiências com tratamentos e apoio emocional.', FALSE),
-('Mitos e Verdades', 'Desmistificação de crenças populares sobre incontinência urinária e saúde íntima.', TRUE),
-('Profissionais Respondem', 'Sessão para perguntas e respostas com especialistas (fisioterapeutas, nutricionistas, médicos).', TRUE);
-
-INSERT INTO content (title, description, subtitle, subContent, categoryId, authorId, repost) VALUES
-('Receita funcional para o café da manhã', 'Comece o dia com uma panqueca de banana e aveia batida com um fio de mel e canela, assada em frigideira antiaderente. Rica em fibras solúveis, ajuda a regular o intestino e reduzir o esforço que pressiona a bexiga. Evite adoçar em excesso e prefira leite vegetal se houver sensibilidade. Combine com uma porção de iogurte natural para proteína.', 'Benefícios para o trato urinário', 'A fibra solúvel da aveia auxilia no trânsito intestinal, diminuindo constipação e a pressão abdominal que pode agravar episódios de escape.', 1, 1, FALSE),
-('Exercício respiratório para relaxar o assoalho pélvico', 'A prática da respiração diafragmática reduz a tensão involuntária dos músculos do assoalho pélvico e melhora o controle neuromuscular. Deite-se com as mãos sobre o abdome, inspire contando até quatro e sinta o diafragma descendo; expire lentamente contando até seis, permitindo que o períneo relaxe. Repita por 5 a 10 minutos, duas vezes ao dia, especialmente após atividades que geram esforço. Integre esses exercícios a uma rotina de alongamento suave.', 'Ponto de atenção', 'Se houver dor ou aumento dos sintomas, interrompa e consulte um fisioterapeuta especializado.', 3, 1, FALSE),
-('Minha jornada pós-parto com incontinência', 'Após o segundo parto experimentei escapes ao espirrar e ao correr; inicialmente ignorei por vergonha, até perceber que afetava minha rotina social. Procurei atendimento fisioterapêutico, aprendi a identificar e contrair corretamente o assoalho pélvico e passei a fortalecer o core com exercícios graduais. Em três meses notei redução dos episódios e mais confiança para voltar a atividades físicas. A troca de experiências com outras mães foi fundamental para manter a motivação.', null, null, 4, 2, FALSE),
-('Mito: só quem teve filhos sofre com incontinência', 'A incontinência urinária não é exclusiva de quem já teve filhos; ela pode surgir por diversos motivos em diferentes faixas etárias. Problemas neurológicos, obesidade, cirurgia pélvica, alterações hormonais e predisposição genética são fatores que aumentam o risco. Identificar o tipo de incontinência é essencial para direcionar o tratamento adequado e eficaz. Informação correta evita estigmas e promove busca precoce por ajuda.', 'Fatores de risco', 'Sedentarismo, excesso de peso, tabagismo e constipação crônica aumentam a probabilidade de desenvolver sintomas.', 5, 1, FALSE),
-('Desafio: 10 minutos de autocuidado por dia', 'Reserve 10 minutos diários para práticas simples: alongamento leve, respiração guiada, hidratação consciente e registro rápido de humor. Pequenos hábitos acumulam efeito na redução do estresse, melhoram o sono e ajudam no controle muscular do períneo ao longo do tempo. Documente os progressos na comunidade para manter a responsabilidade e inspirar outras pessoas. Experimente variar a atividade a cada dia para manter o engajamento.', null, null, 2, 2, FALSE),
-('Posso fazer pilates com incontinência?', 'Sim, pilates pode ser uma ferramenta eficaz quando adaptado às necessidades de quem tem incontinência; o foco é na ativação controlada do core e no equilíbrio da pressão intra-abdominal. Instrutores com formação em saúde da mulher devem priorizar exercícios com respiração coordenada e evitar movimentos que gerem esforço abrupto sem suporte muscular. Comece com sessões individuais ou em pequenos grupos até ganhar controle e segurança. Monitore sintomas e ajuste progressão conforme orientação profissional.', 'Dicas para praticar com segurança', 'Procure profissionais que realizem avaliação inicial do assoalho pélvico e ofereçam progressão personalizada.', 6, 1, FALSE);
+INSERT INTO content (title, description, subtitle, subContent, authorId, repost) VALUES
+('Receita funcional para o café da manhã', 'Comece o dia com uma panqueca de banana e aveia batida com um fio de mel e canela, assada em frigideira antiaderente. Rica em fibras solúveis, ajuda a regular o intestino e reduzir o esforço que pressiona a bexiga. Evite adoçar em excesso e prefira leite vegetal se houver sensibilidade. Combine com uma porção de iogurte natural para proteína.', 'Benefícios para o trato urinário', 'A fibra solúvel da aveia auxilia no trânsito intestinal, diminuindo constipação e a pressão abdominal que pode agravar episódios de escape.', 1, FALSE),
+('Exercício respiratório para relaxar o assoalho pélvico', 'A prática da respiração diafragmática reduz a tensão involuntária dos músculos do assoalho pélvico e melhora o controle neuromuscular. Deite-se com as mãos sobre o abdome, inspire contando até quatro e sinta o diafragma descendo; expire lentamente contando até seis, permitindo que o períneo relaxe. Repita por 5 a 10 minutos, duas vezes ao dia, especialmente após atividades que geram esforço. Integre esses exercícios a uma rotina de alongamento suave.', 'Ponto de atenção', 'Se houver dor ou aumento dos sintomas, interrompa e consulte um fisioterapeuta especializado.', 1, FALSE),
+('Minha jornada pós-parto com incontinência', 'Após o segundo parto experimentei escapes ao espirrar e ao correr; inicialmente ignorei por vergonha, até perceber que afetava minha rotina social. Procurei atendimento fisioterapêutico, aprendi a identificar e contrair corretamente o assoalho pélvico e passei a fortalecer o core com exercícios graduais. Em três meses notei redução dos episódios e mais confiança para voltar a atividades físicas. A troca de experiências com outras mães foi fundamental para manter a motivação.', NULL, NULL, 2, FALSE),
+('Mito: só quem teve filhos sofre com incontinência', 'A incontinência urinária não é exclusiva de quem já teve filhos; ela pode surgir por diversos motivos em diferentes faixas etárias. Problemas neurológicos, obesidade, cirurgia pélvica, alterações hormonais e predisposição genética são fatores que aumentam o risco. Identificar o tipo de incontinência é essencial para direcionar o tratamento adequado e eficaz. Informação correta evita estigmas e promove busca precoce por ajuda.', 'Fatores de risco', 'Sedentarismo, excesso de peso, tabagismo e constipação crônica aumentam a probabilidade de desenvolver sintomas.', 1, FALSE),
+('Desafio: 10 minutos de autocuidado por dia', 'Reserve 10 minutos diários para práticas simples: alongamento leve, respiração guiada, hidratação consciente e registro rápido de humor. Pequenos hábitos acumulam efeito na redução do estresse, melhoram o sono e ajudam no controle muscular do períneo ao longo do tempo. Documente os progressos na comunidade para manter a responsabilidade e inspirar outras pessoas. Experimente variar a atividade a cada dia para manter o engajamento.', NULL, NULL, 2, FALSE),
+('Posso fazer pilates com incontinência?', 'Sim, pilates pode ser uma ferramenta eficaz quando adaptado às necessidades de quem tem incontinência; o foco é na ativação controlada do core e no equilíbrio da pressão intra-abdominal. Instrutores com formação em saúde da mulher devem priorizar exercícios com respiração coordenada e evitar movimentos que gerem esforço abrupto sem suporte muscular. Comece com sessões individuais ou em pequenos grupos até ganhar controle e segurança. Monitore sintomas e ajuste progressão conforme orientação profissional.', 'Dicas para praticar com segurança', 'Procure profissionais que realizem avaliação inicial do assoalho pélvico e ofereçam progressão personalizada.', 1, FALSE);
 
 INSERT INTO media (url, contentType, contentSize, altText) VALUES
 ('http://127.0.0.1:10000/devstoreaccount1/media/91b2247e-070f-4668-8d1f-11063629811a.jpg', 'image/jpeg', 107015, 'Porção de panquecas de banana e aveia com mel e canela em um prato branco sobre uma mesa de madeira clara.'),
