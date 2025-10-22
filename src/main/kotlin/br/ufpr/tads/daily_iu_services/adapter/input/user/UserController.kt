@@ -1,5 +1,7 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.user
 
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ExerciseFeedbackCreatorDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ChangePasswordDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginRequestDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginResponseDTO
@@ -55,5 +57,25 @@ class UserController(private val userService: UserService) {
     fun changePassword(@RequestBody @Valid request: ChangePasswordDTO): ResponseEntity<Void> {
         userService.resetPassword(request)
         return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/workout/plan")
+    @Operation(summary = "Obter Plano de Treino", description = "Recuperar o plano de treino de um usuário")
+    fun getWorkoutPlan(@RequestHeader("x-user-id") userId: Long): ResponseEntity<UserWorkoutPlanDTO> {
+        TODO("Not implemented yet")
+    }
+
+    @PostMapping("/workout/completion")
+    @Operation(summary = "Registrar Conclusão de Treino", description = "Registrar a conclusão de um treino")
+    @ApiResponse(responseCode = "204", description = "Conclusão de treino registrada com sucesso")
+    fun logWorkoutCompletion(@RequestHeader("x-user-id") userId: Long): ResponseEntity<Void> {
+        TODO("Not implemented yet")
+    }
+
+    @PostMapping("/workout/feedback")
+    @Operation(summary = "Registra Feedback de Treino", description = "Cria uma nova entrada de feedback de treino")
+    @ApiResponse(responseCode = "204", description = "Feedback de treino registrado com sucesso")
+    fun createWorkoutFeedback(@RequestHeader("x-user-id") userId: Long, @RequestBody request: List<ExerciseFeedbackCreatorDTO>) {
+        TODO("Not implemented yet")
     }
 }

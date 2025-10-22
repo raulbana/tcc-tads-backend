@@ -222,6 +222,7 @@ GO
 
 CREATE TABLE workoutPlan (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL,
     description NVARCHAR(MAX) DEFAULT NULL,
     daysPerWeek INT NOT NULL,
     totalWeeks INT NOT NULL,

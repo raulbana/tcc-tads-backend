@@ -21,7 +21,6 @@ import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Report
 import br.ufpr.tads.daily_iu_services.domain.entity.content.SavedContent
-import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
 import br.ufpr.tads.daily_iu_services.exception.NotAllowedException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
@@ -86,7 +85,7 @@ class ContentService(
 
         val medias = request.media
             .map { ContentMapper.INSTANCE.mediaDTOToEntity(it) }
-            .map { mediaRepository.save(it) }
+            .map { if (it.id == null) mediaRepository.save(it) else it }
             .map { ContentMedia(content = content, media = it) }
 
         content.media.addAll(medias)
@@ -113,41 +112,21 @@ class ContentService(
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
         }
 
-        val updatedContent: Content = existingContent.copy(
-            title = request.title,
-            description = request.description,
-            subtitle = request.subtitle,
-            subcontent = request.subcontent
-        )
+        existingContent.title = request.title
+        existingContent.description = request.description
+        existingContent.subtitle = request.subtitle
+        existingContent.subcontent = request.subcontent
+        existingContent.media.clear()
 
-        syncContentMediaList(
-            updatedContent.media,
-            request.media.map { ContentMapper.INSTANCE.mediaDTOToEntity(it) }
-        )
+        val medias = request.media
+            .map { ContentMapper.INSTANCE.mediaDTOToEntity(it) }
+            .map { if (it.id == null) mediaRepository.save(it) else it }
+            .map { ContentMedia(content = existingContent, media = it) }
 
-        val result = contentRepository.save(updatedContent)
+        existingContent.media.addAll(medias)
 
+        val result = contentRepository.save(existingContent)
         return ContentMapper.INSTANCE.contentToDTO(result, userId)
-    }
-
-    fun syncContentMediaList(
-        contentMediaList: MutableList<ContentMedia>,
-        mediaList: List<Media>
-    ) {
-        mediaList.forEach { media ->
-            val persistedMedia = if (media.id == null) mediaRepository.save(media) else media
-
-            val exists = contentMediaList.any { it.media == persistedMedia }
-            if (!exists) {
-                val content = contentMediaList.firstOrNull()?.content
-                if (content != null) {
-                    contentMediaList.add(ContentMedia(content = content, media = persistedMedia))
-                }
-            }
-        }
-
-        val mediaSet = mediaList.toSet()
-        contentMediaList.removeIf { !mediaSet.contains(it.media) }
     }
 
     fun deleteContent(contentId: Long) {

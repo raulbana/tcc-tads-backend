@@ -1,5 +1,6 @@
-package br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto
+package br.ufpr.tads.daily_iu_services.adapter.input.user.dto
 
+import br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto.WorkoutPlanDTO
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDateTime
 

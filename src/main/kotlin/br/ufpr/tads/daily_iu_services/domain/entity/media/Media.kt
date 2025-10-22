@@ -18,20 +18,4 @@ class Media(
     val contentSize: Long,
     var altText: String,
     var createdAt: LocalDateTime
-){
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Media) return false
-
-        if (contentSize != other.contentSize) return false
-        if (url != other.url) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = contentSize.hashCode()
-        result = 31 * result + url.hashCode()
-        return result
-    }
-}
+)
