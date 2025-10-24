@@ -6,6 +6,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto.ExerciseDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto.WorkoutDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto.WorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.Exercise
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseAttribute
@@ -13,6 +14,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseAttributeEx
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseAttributeType
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseCategory
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseMedia
+import br.ufpr.tads.daily_iu_services.domain.entity.exercise.UserWorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.Workout
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.WorkoutExercise
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.WorkoutPlan
@@ -80,4 +82,7 @@ abstract class ExerciseMapper {
 
     @Mapping(target = "workouts", expression = "java(workoutsPlanToDTOMap(entity.getWorkouts()))")
     abstract fun workoutPlanEntityToDTO(entity: WorkoutPlan): WorkoutPlanDTO
+
+    @Mapping(target = "plan", expression = "java(workoutPlanEntityToDTO(entity.getPlan()))")
+    abstract fun userWorkoutPlanEntityToDTO(entity: UserWorkoutPlan): UserWorkoutPlanDTO
 }

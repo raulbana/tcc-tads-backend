@@ -1,5 +1,6 @@
 package br.ufpr.tads.daily_iu_services.exception.handler
 
+import br.ufpr.tads.daily_iu_services.exception.NoContentException
 import br.ufpr.tads.daily_iu_services.exception.NotAllowedException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import br.ufpr.tads.daily_iu_services.exception.domain.ExceptionOrigin
@@ -39,6 +40,11 @@ class GlobalExceptionHandler {
                     ex.message ?: "Recurso não encontrado"
                 )
             )
+    }
+
+    @ExceptionHandler(NoContentException::class)
+    fun handleNoContentException(ex: NoContentException): ResponseEntity<Void> {
+        return ResponseEntity.noContent().build()
     }
 
     @ExceptionHandler(NotAllowedException::class)

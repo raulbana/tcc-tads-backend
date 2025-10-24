@@ -19,16 +19,11 @@ abstract class CalendarMapper {
         val INSTANCE: CalendarMapper = Mappers.getMapper(CalendarMapper::class.java)
     }
 
-    @Mapping(target = "date", source = "calendar.date")
     @Mapping(target = "leakageLevel", expression = "java(calendar.getLeakageLevel().toString())")
-    @Mapping(target = "eventsCount", source = "calendar.eventsCount")
-    @Mapping(target = "completedExercises", source = "calendar.completedExercises")
-    @Mapping(target = "notesPreview", source = "calendar.notesPreview")
-    @Mapping(target = "urinationData", expression = "java(urinationDataListToDTO(data))")
-    @Mapping(target = "dayTitle", source = "calendar.dayTitle")
+    @Mapping(target = "urinationData", expression = "java(urinationDataListToDTO(calendar.getUrinationData()))")
     @Mapping(target = "dayNumber", constant = "1")
     @Mapping(target = "isToday", constant = "false")
-    abstract fun calendarDaytoDTO(calendar: CalendarDay, data: List<UrinationData>?): CalendarDayDTO
+    abstract fun calendarDaytoDTO(calendar: CalendarDay): CalendarDayDTO
 
     @AfterMapping
     fun calendarDTOAfterMapping(@MappingTarget calendarDTO: CalendarDayDTO){
@@ -52,17 +47,13 @@ abstract class CalendarMapper {
     @Mapping(target = "time", source = "time", qualifiedByName = ["timeToLocalTime"])
     abstract fun urinationDatatoDTO(data: UrinationData): UrinationDataDTO
 
-    @Mapping(target = "id", ignore = true )
     @Mapping(target = "calendarDay", ignore = true )
     @Mapping(target = "amount", expression = "java(LeakageLevel.Companion.from(data.getAmount()))")
     @Mapping(target = "time", source = "time", qualifiedByName = ["localTimeToTime"])
+    @Mapping(target = "urgency", source = "urgency", defaultValue = "false")
     abstract fun urinationDataDTOtoEntity(data: UrinationDataDTO): UrinationData
 
     fun urinationDataListToDTO(data: List<UrinationData>?): List<UrinationDataDTO>?{
         return data?.map { urinationDatatoDTO(it) }
-    }
-
-    fun urinationDataDTOListToEntity(data: List<UrinationDataDTO>?): List<UrinationData>?{
-        return data?.map { urinationDataDTOtoEntity(it) }
     }
 }

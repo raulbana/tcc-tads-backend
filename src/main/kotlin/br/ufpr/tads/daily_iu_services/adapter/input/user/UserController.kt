@@ -5,6 +5,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ChangePasswordDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginRequestDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginResponseDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.WorkoutCompletionDTO
 import br.ufpr.tads.daily_iu_services.domain.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -62,20 +63,22 @@ class UserController(private val userService: UserService) {
     @GetMapping("/workout/plan")
     @Operation(summary = "Obter Plano de Treino", description = "Recuperar o plano de treino de um usuário")
     fun getWorkoutPlan(@RequestHeader("x-user-id") userId: Long): ResponseEntity<UserWorkoutPlanDTO> {
-        TODO("Not implemented yet")
+        return ResponseEntity.ok(userService.getWorkoutPlan(userId))
     }
 
     @PostMapping("/workout/completion")
     @Operation(summary = "Registrar Conclusão de Treino", description = "Registrar a conclusão de um treino")
     @ApiResponse(responseCode = "204", description = "Conclusão de treino registrada com sucesso")
-    fun logWorkoutCompletion(@RequestHeader("x-user-id") userId: Long): ResponseEntity<Void> {
-        TODO("Not implemented yet")
+    fun logWorkoutCompletion(@RequestHeader("x-user-id") userId: Long, @RequestBody request: List<WorkoutCompletionDTO>): ResponseEntity<Void> {
+        userService.logWorkoutCompletion(userId, request)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/workout/feedback")
     @Operation(summary = "Registra Feedback de Treino", description = "Cria uma nova entrada de feedback de treino")
     @ApiResponse(responseCode = "204", description = "Feedback de treino registrado com sucesso")
-    fun createWorkoutFeedback(@RequestHeader("x-user-id") userId: Long, @RequestBody request: List<ExerciseFeedbackCreatorDTO>) {
-        TODO("Not implemented yet")
+    fun createWorkoutFeedback(@RequestHeader("x-user-id") userId: Long, @RequestBody @Valid request: List<ExerciseFeedbackCreatorDTO>): ResponseEntity<Void> {
+        userService.createWorkoutFeedback(userId, request)
+        return ResponseEntity.noContent().build()
     }
 }

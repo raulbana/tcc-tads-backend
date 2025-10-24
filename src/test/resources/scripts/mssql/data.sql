@@ -208,3 +208,54 @@ INSERT INTO exerciseCategory (name, description) VALUES
 ('Mobilidade Pélvica', 'Sequências que estimulam o movimento consciente da pelve, melhorando a coordenação, a circulação local e a percepção corporal. Indicados para quem sente rigidez ou desconforto na região.'),
 ('Respiração e Relaxamento', 'Técnicas respiratórias que ativam o diafragma e promovem relaxamento do assoalho pélvico. Essenciais para reduzir tensão muscular, melhorar o controle abdominal e favorecer a recuperação pós-parto.');
 GO
+
+INSERT INTO exerciseAttribute (name, type, description) VALUES
+('Fortalecimento do Assoalho Pélvico', 1, 'Melhora a força e resistência dos músculos do assoalho pélvico, reduzindo episódios de incontinência.'),
+('Aumento da Flexibilidade', 1, 'Promove maior amplitude de movimento na região pélvica e lombar, aliviando tensões musculares.'),
+('Melhora da Postura', 1, 'Contribui para o alinhamento corporal adequado, reduzindo sobrecarga na região pélvica.'),
+('Redução do Estresse', 1, 'Técnicas de respiração e relaxamento que ajudam a diminuir a tensão muscular e o estresse geral.');
+GO
+
+INSERT INTO exercise (title, categoryId, instructions, repetitions, sets, restTime, duration) VALUES
+('Exercícios de Kegel Básicos', 1, 'Deitada de costas ou sentada, contraia o períneo por 5 segundos e relaxe.', 10, 3, 10, 80),
+('Exercícios de Ponte', 1, 'Deitada de costas, contraia o bumbum, elevando-o da cama ou do chão enquanto inspira (puxa o ar)', 10, 3, 15, 90),
+('Alongamento do Gato-Vaca', 2, 'Em posição de quatro apoios, alterne entre arquear e arredondar as costas.', 10, 2, 10, 60),
+('Mobilização Pélvica em Círculos', 3, 'Sentada, faça movimentos circulares com a pelve, alternando sentido horário e anti-horário.', 10, 2, 10, 60),
+('Respiração Diafragmática', 4, 'Deitada ou sentada, inspire profundamente pelo nariz, expandindo o abdome, e expire lentamente pela boca.', 5, 3, 15, 75);
+GO
+
+INSERT INTO exerciseExerciseAttribute (exerciseId, attributeId) VALUES
+((SELECT id FROM exercise WHERE title = 'Exercícios de Kegel Básicos'), (SELECT id FROM exerciseAttribute WHERE name = 'Fortalecimento do Assoalho Pélvico')),
+((SELECT id FROM exercise WHERE title = 'Exercícios de Ponte'), (SELECT id FROM exerciseAttribute WHERE name = 'Fortalecimento do Assoalho Pélvico')),
+((SELECT id FROM exercise WHERE title = 'Alongamento do Gato-Vaca'), (SELECT id FROM exerciseAttribute WHERE name = 'Aumento da Flexibilidade')),
+((SELECT id FROM exercise WHERE title = 'Mobilização Pélvica em Círculos'), (SELECT id FROM exerciseAttribute WHERE name = 'Aumento da Flexibilidade')),
+((SELECT id FROM exercise WHERE title = 'Respiração Diafragmática'), (SELECT id FROM exerciseAttribute WHERE name = 'Redução do Estresse'));
+GO
+
+INSERT INTO workout (name, description, totalDuration, difficultyLevel) VALUES
+('Rotina Matinal para Fortalecimento', 'Sequência de exercícios para iniciar o dia com foco no fortalecimento do assoalho pélvico e mobilidade pélvica.', 300, 'BEGINNER'),
+('Alongamento e Relaxamento Noturno', 'Série de alongamentos e técnicas de respiração para relaxar antes de dormir, aliviando tensões acumuladas.', 240, 'BEGINNER');
+GO
+
+INSERT INTO workoutExercise (workoutId, exerciseId, exerciseOrder) VALUES
+((SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), (SELECT id FROM exercise WHERE title = 'Exercícios de Kegel Básicos'), 1),
+((SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), (SELECT id FROM exercise WHERE title = 'Mobilização Pélvica em Círculos'), 2),
+((SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), (SELECT id FROM exercise WHERE title = 'Alongamento do Gato-Vaca'), 1),
+((SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), (SELECT id FROM exercise WHERE title = 'Respiração Diafragmática'), 2);
+GO
+
+INSERT INTO workoutPlan (name, description, daysPerWeek, totalWeeks, iciqScoreRecommendation) VALUES
+('Plano de 4 Semanas para Iniciantes', 'Programa gradual para fortalecer o assoalho pélvico e melhorar o controle urinário ao longo de um mês.', 3, 4, 5),
+('Plano de Manutenção Semanal', 'Rotina semanal para manter os ganhos de força e flexibilidade do assoalho pélvico.', 2, 8, 8);
+GO
+
+INSERT INTO workoutPlanWorkout (workoutPlanId, workoutId, workoutOrder) VALUES
+((SELECT id FROM workoutPlan WHERE name = 'Plano de 4 Semanas para Iniciantes'), (SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), 1),
+((SELECT id FROM workoutPlan WHERE name = 'Plano de 4 Semanas para Iniciantes'), (SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), 2),
+((SELECT id FROM workoutPlan WHERE name = 'Plano de Manutenção Semanal'), (SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), 1);
+GO
+
+INSERT INTO userWorkoutPlan (userId, workoutPlanId, startDate, endDate, totalProgress, weekProgress, currentWeek, nextWorkout, completed) VALUES
+(1, (SELECT id FROM workoutPlan WHERE name = 'Plano de 4 Semanas para Iniciantes'), '2025-06-01', '2025-06-28', 12, 3, 4, null, 1),
+(2, (SELECT id FROM workoutPlan WHERE name = 'Plano de Manutenção Semanal'), '2025-07-01', NULL, 0, 0, 1, 1, 0);
+GO
