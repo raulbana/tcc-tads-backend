@@ -193,6 +193,7 @@ CREATE TABLE IF NOT EXISTS workoutExercise (
 
 CREATE TABLE IF NOT EXISTS workoutPlan (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
     description VARCHAR(10000) DEFAULT NULL,
     daysPerWeek INT NOT NULL,
     totalWeeks INT NOT NULL,

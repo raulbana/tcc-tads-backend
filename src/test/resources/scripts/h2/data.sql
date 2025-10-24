@@ -130,22 +130,6 @@ INSERT INTO content (title, description, subtitle, subContent, authorId, repost)
 ('Desafio: 10 minutos de autocuidado por dia', 'Reserve 10 minutos diários para práticas simples: alongamento leve, respiração guiada, hidratação consciente e registro rápido de humor. Pequenos hábitos acumulam efeito na redução do estresse, melhoram o sono e ajudam no controle muscular do períneo ao longo do tempo. Documente os progressos na comunidade para manter a responsabilidade e inspirar outras pessoas. Experimente variar a atividade a cada dia para manter o engajamento.', NULL, NULL, 2, FALSE),
 ('Posso fazer pilates com incontinência?', 'Sim, pilates pode ser uma ferramenta eficaz quando adaptado às necessidades de quem tem incontinência; o foco é na ativação controlada do core e no equilíbrio da pressão intra-abdominal. Instrutores com formação em saúde da mulher devem priorizar exercícios com respiração coordenada e evitar movimentos que gerem esforço abrupto sem suporte muscular. Comece com sessões individuais ou em pequenos grupos até ganhar controle e segurança. Monitore sintomas e ajuste progressão conforme orientação profissional.', 'Dicas para praticar com segurança', 'Procure profissionais que realizem avaliação inicial do assoalho pélvico e ofereçam progressão personalizada.', 1, FALSE);
 
-INSERT INTO media (url, contentType, contentSize, altText) VALUES
-('http://127.0.0.1:10000/devstoreaccount1/media/91b2247e-070f-4668-8d1f-11063629811a.jpg', 'image/jpeg', 107015, 'Porção de panquecas de banana e aveia com mel e canela em um prato branco sobre uma mesa de madeira clara.'),
-('http://127.0.0.1:10000/devstoreaccount1/media/ffd6af37-eab6-49d2-8276-36f13252617f.png', 'image/png', 420209, 'Ilustração de uma mulher sentada em uma cadeira, com as mãos sobre o abdome, demonstrando a respiração diafragmática.'),
-('http://127.0.0.1:10000/devstoreaccount1/media/3467b840-3aa0-4fe9-b8fb-2dcc7bbea020.png', 'image/png', 1405504, 'Foto de uma mulher sentada em uma poltrona, com seu bebê no colo e expressão de cansaço e mão sobre a testa.'),
-('http://127.0.0.1:10000/devstoreaccount1/media/80e5d0be-4516-4a65-b5da-967fdd8823c9.jpg', 'image/jpeg', 158010, 'Foto de uma mulher serena, com os olhos fechados e expressão tranquila, em um ambiente claro com seu bebê no colo, enrolado em um cobertor.'),
-('http://127.0.0.1:10000/devstoreaccount1/media/573aa04e-716d-4c74-b009-3b83f10e3834.jpg', 'image/jpeg', 63847, 'Ilustração de uma mulher no campo em posição de meditação, acima de sua cabeça flutuam ícones representando autocuidado, como um coração, livros e pesos de academia.'),
-('http://127.0.0.1:10000/devstoreaccount1/media/79964e42-cb11-4b4a-9c49-2a9687bcef9b.png', 'image/png', 938243, 'Foto de uma mulher praticando pilates em um estúdio, sentada em cima do joelho, alongando a parte lateral do corpo com os dois braços estendidos para cima.');
-
-INSERT INTO contentMedia (contentId, mediaId) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5),
-(6, 6);
-
 INSERT INTO comment (contentId, authorId, text) VALUES
 (1, 2, 'Adorei a receita! Vou testar no café da manhã de amanhã.'),
 (2, 1, 'Exercício simples e eficaz. Já sinto mais relaxamento.'),
