@@ -42,6 +42,9 @@ class WorkoutPlanControllerTest {
     @Autowired
     private lateinit var workoutRepository: WorkoutRepository
 
+    private lateinit var savedWorkout: Workout
+    private lateinit var savedWorkoutPlan: WorkoutPlan
+
     @BeforeAll
     fun setup() {
         val workout = Workout(
@@ -51,14 +54,17 @@ class WorkoutPlanControllerTest {
             difficultyLevel = "Iniciante"
         )
 
-        val savedWorkout = workoutRepository.save(workout)
+        savedWorkout = workoutRepository.save(workout)
 
         val workoutPlan = WorkoutPlan(
             name = "Plano de Treino Semanal",
             description = "Um plano de treino semanal focado no fortalecimento do assoalho pélvico.",
             daysPerWeek = 3,
             totalWeeks = 4,
-            iciqScoreRecommendation = 4
+            iciqScoreMin = 4,
+            iciqScoreMax = 8,
+            ageMin = 16,
+            ageMax = 65
         )
 
         workoutPlan.workouts.add(
@@ -68,13 +74,13 @@ class WorkoutPlanControllerTest {
                 workoutOrder = 1
             )
         )
-        repository.save(workoutPlan)
+        savedWorkoutPlan = repository.save(workoutPlan)
     }
 
     @AfterAll
     fun teardown() {
-        repository.deleteAll()
-        workoutRepository.deleteAll()
+        repository.delete(savedWorkoutPlan)
+        workoutRepository.delete(savedWorkout)
     }
 
     @Test
@@ -103,8 +109,11 @@ class WorkoutPlanControllerTest {
             description = "Um plano de treino diário focado no fortalecimento do assoalho pélvico.",
             daysPerWeek = 7,
             totalWeeks = 2,
-            iciqScoreRecommendation = 3,
-            workoutIds = mapOf(1 to 1L)
+            iciqScoreMin = 3,
+            iciqScoreMax = 10,
+            ageMin = 18,
+            ageMax = 65,
+            workoutIds = mapOf(1 to savedWorkout.id!!)
         )
 
         val result = mvc.perform(
@@ -139,7 +148,10 @@ class WorkoutPlanControllerTest {
             description = "Um plano de treino semanal atualizado focado no fortalecimento do assoalho pélvico.",
             daysPerWeek = 4,
             totalWeeks = 6,
-            iciqScoreRecommendation = 5,
+            iciqScoreMin = 5,
+            iciqScoreMax = 9,
+            ageMin = 18,
+            ageMax = 60,
             workoutIds = mapOf(1 to savedWorkout.id!!)
         )
 
@@ -167,7 +179,10 @@ class WorkoutPlanControllerTest {
             description = "Um plano de treino mensal focado no fortalecimento do assoalho pélvico.",
             daysPerWeek = 2,
             totalWeeks = 8,
-            iciqScoreRecommendation = 6
+            iciqScoreMin = 6,
+            iciqScoreMax = 12,
+            ageMin = 20,
+            ageMax = 70
         )
 
         val savedPlan = repository.save(planToDelete)

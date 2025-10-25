@@ -26,7 +26,10 @@ class WorkoutPlanService(
             description = request.description,
             daysPerWeek = request.daysPerWeek,
             totalWeeks = request.totalWeeks,
-            iciqScoreRecommendation = request.iciqScoreRecommendation
+            iciqScoreMin = request.iciqScoreMin,
+            iciqScoreMax = request.iciqScoreMax,
+            ageMin = request.ageMin,
+            ageMax = request.ageMax
         )
 
         val workouts = request.workoutIds.map { (order, workoutId) ->
@@ -53,7 +56,10 @@ class WorkoutPlanService(
         existingWorkoutPlan.description = request.description
         existingWorkoutPlan.daysPerWeek = request.daysPerWeek
         existingWorkoutPlan.totalWeeks = request.totalWeeks
-        existingWorkoutPlan.iciqScoreRecommendation = request.iciqScoreRecommendation
+        existingWorkoutPlan.iciqScoreMin = request.iciqScoreMin
+        existingWorkoutPlan.iciqScoreMax = request.iciqScoreMax
+        existingWorkoutPlan.ageMin = request.ageMin
+        existingWorkoutPlan.ageMax = request.ageMax
 
         existingWorkoutPlan.workouts.clear()
         val updatedWorkouts = request.workoutIds.map { (order, workoutId) ->
@@ -77,4 +83,9 @@ class WorkoutPlanService(
             .orElseThrow { Exception("Plano de treino com id $id não encontrado") }
         workoutPlanRepository.delete(existingWorkoutPlan)
     }
+
+    fun findSuitableWorkoutPlans(age: Int, iciqScore: Int): List<WorkoutPlan> =
+        workoutPlanRepository.findByAgeMinLessThanEqualAndAgeMaxGreaterThanEqualAndIciqScoreMinLessThanEqualAndIciqScoreMaxGreaterThanEqual(
+            age, age, iciqScore, iciqScore
+        )
 }

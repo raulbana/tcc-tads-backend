@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.time.LocalDateTime
@@ -32,7 +31,7 @@ data class UserWorkoutPlan(
     var totalProgress: Int,
     var weekProgress: Int,
     var currentWeek: Int,
-    var nextWorkout: Int,
+    var nextWorkout: Int?,
     var lastWorkoutDate: LocalDateTime?,
     var completed: Boolean,
 

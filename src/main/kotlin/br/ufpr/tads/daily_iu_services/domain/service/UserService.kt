@@ -8,10 +8,12 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginResponseDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.WorkoutCompletionDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.mapper.UserMapper
+import br.ufpr.tads.daily_iu_services.adapter.output.exercise.ExerciseFeedbackRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.UserWorkoutPlanRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.MailClient
 import br.ufpr.tads.daily_iu_services.adapter.output.user.OTPRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.UserRepository
+import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseFeedback
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Credential
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
@@ -19,15 +21,18 @@ import br.ufpr.tads.daily_iu_services.exception.NoContentException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
-class UserService(
+class UserService (
     private val passwordService: PasswordService,
     private val tokenService: TokenJWTService,
     private val calendarService: CalendarService,
     private val userRepository: UserRepository,
     private val otpRepository: OTPRepository,
     private val userWorkoutPlanRepository: UserWorkoutPlanRepository,
+    private val exerciseFeedbackRepository: ExerciseFeedbackRepository,
     private val mailClient: MailClient
 ) {
 
@@ -133,7 +138,7 @@ class UserService(
 
             // Lógica para registrar a conclusão do treino
             userWorkoutPlan.lastWorkoutDate = completion.completedAt
-            userWorkoutPlan.nextWorkout += 1
+            userWorkoutPlan.nextWorkout = userWorkoutPlan.nextWorkout?.plus(1) ?: 1
             userWorkoutPlan.weekProgress += 1
             userWorkoutPlan.totalProgress += 1
 
@@ -146,11 +151,12 @@ class UserService(
             // Verifica se o plano foi concluído
             if (userWorkoutPlan.totalProgress >= userWorkoutPlan.plan.daysPerWeek * userWorkoutPlan.plan.totalWeeks) {
                 userWorkoutPlan.completed = true
+                userWorkoutPlan.nextWorkout = null
                 userWorkoutPlan.endDate = completion.completedAt
             }
 
             // Se o plano não foi concluído, e o próximo treino ultrapassa o total de treinos, reseta para o primeiro treino
-            if (!userWorkoutPlan.completed && userWorkoutPlan.nextWorkout >= userWorkoutPlan.plan.workouts.size) {
+            if (!userWorkoutPlan.completed && userWorkoutPlan.nextWorkout!! >= userWorkoutPlan.plan.workouts.size) {
                 userWorkoutPlan.nextWorkout = 1
             }
 
@@ -166,6 +172,34 @@ class UserService(
     }
 
     fun createWorkoutFeedback(userId: Long, request: List<ExerciseFeedbackCreatorDTO>) {
-        TODO("Not implemented yet")
+        val user = userRepository.findById(userId).orElseThrow {
+            NotFoundException("Usuário com ID $userId não encontrado")
+        }
+
+        val userWorkoutPlan = userWorkoutPlanRepository.findByUserAndCompletedFalse(user)
+            ?: throw NoContentException("Usuário com ID $userId não possui um plano de treino ativo")
+
+        val feedbacks: MutableList<ExerciseFeedback> = mutableListOf()
+        for (feedbackDTO in request) {
+            val workout = userWorkoutPlan.plan.workouts.find { it.workout.id == feedbackDTO.workoutId }
+                ?: throw NotFoundException("Treino com ID ${feedbackDTO.workoutId} não encontrado no plano de treino do usuário")
+
+            val exercise = workout.workout.exercises.find { it.exercise.id == feedbackDTO.exerciseId }
+                ?: throw NotFoundException("Exercício com ID ${feedbackDTO.exerciseId} não encontrado no treino do plano de treino do usuário")
+
+            val feedback = ExerciseFeedback(
+                user = user,
+                exercise = exercise.exercise,
+                workout = workout.workout,
+                evaluation = feedbackDTO.evaluation,
+                rating = feedbackDTO.rating,
+                comments = feedbackDTO.comments ?: "",
+                completedAt = feedbackDTO.completedAt ?: LocalDate.now()
+            )
+
+            feedbacks.add(feedback)
+        }
+
+        exerciseFeedbackRepository.saveAll(feedbacks)
     }
 }

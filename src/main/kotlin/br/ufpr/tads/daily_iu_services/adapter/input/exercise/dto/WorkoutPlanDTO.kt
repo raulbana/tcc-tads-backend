@@ -7,5 +7,8 @@ data class WorkoutPlanDTO(
     val workouts: Map<Int, WorkoutDTO>,
     val daysPerWeek: Int,
     val totalWeeks: Int,
-    val iciqScoreRecommendation: Int
+    val iciqScoreMin: Int,
+    val iciqScoreMax: Int,
+    val ageMin: Int,
+    val ageMax: Int
 )

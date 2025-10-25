@@ -14,7 +14,7 @@ data class UserWorkoutPlanDTO(
     val totalProgress: Int,
     val weekProgress: Int,
     val currentWeek: Int,
-    val nextWorkout: Int,
+    val nextWorkout: Int?,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val lastWorkoutDate: LocalDateTime?,
     val completed: Boolean

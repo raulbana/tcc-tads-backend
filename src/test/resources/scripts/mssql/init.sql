@@ -34,7 +34,7 @@ CREATE TABLE preferences (
     reminderWorkout BIT NOT NULL DEFAULT 0,
     reminderWorkoutSchedule TIME,
     encouragingMessages BIT NOT NULL DEFAULT 1,
-    workoutMediaType NVARCHAR(10) NOT NULL DEFAULT 'VIDEO'
+    notificationToken NVARCHAR(255) NOT NULL DEFAULT ''
 );
 GO
 
@@ -226,7 +226,10 @@ CREATE TABLE workoutPlan (
     description NVARCHAR(MAX) DEFAULT NULL,
     daysPerWeek INT NOT NULL,
     totalWeeks INT NOT NULL,
-    iciqScoreRecommendation INT NOT NULL,
+    iciqScoreMin INT NOT NULL,
+    iciqScoreMax INT NOT NULL,
+    ageMin INT NOT NULL,
+    ageMax INT NOT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE()
 );
 GO

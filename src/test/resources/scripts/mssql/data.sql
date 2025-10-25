@@ -210,10 +210,10 @@ INSERT INTO exerciseCategory (name, description) VALUES
 GO
 
 INSERT INTO exerciseAttribute (name, type, description) VALUES
-('Fortalecimento do Assoalho Pélvico', 1, 'Melhora a força e resistência dos músculos do assoalho pélvico, reduzindo episódios de incontinência.'),
-('Aumento da Flexibilidade', 1, 'Promove maior amplitude de movimento na região pélvica e lombar, aliviando tensões musculares.'),
-('Melhora da Postura', 1, 'Contribui para o alinhamento corporal adequado, reduzindo sobrecarga na região pélvica.'),
-('Redução do Estresse', 1, 'Técnicas de respiração e relaxamento que ajudam a diminuir a tensão muscular e o estresse geral.');
+('Fortalecimento do Assoalho Pélvico', 'BENEFIT', 'Melhora a força e resistência dos músculos do assoalho pélvico, reduzindo episódios de incontinência.'),
+('Aumento da Flexibilidade', 'BENEFIT', 'Promove maior amplitude de movimento na região pélvica e lombar, aliviando tensões musculares.'),
+('Melhora da Postura', 'BENEFIT', 'Contribui para o alinhamento corporal adequado, reduzindo sobrecarga na região pélvica.'),
+('Redução do Estresse', 'BENEFIT', 'Técnicas de respiração e relaxamento que ajudam a diminuir a tensão muscular e o estresse geral.');
 GO
 
 INSERT INTO exercise (title, categoryId, instructions, repetitions, sets, restTime, duration) VALUES
@@ -244,9 +244,9 @@ INSERT INTO workoutExercise (workoutId, exerciseId, exerciseOrder) VALUES
 ((SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), (SELECT id FROM exercise WHERE title = 'Respiração Diafragmática'), 2);
 GO
 
-INSERT INTO workoutPlan (name, description, daysPerWeek, totalWeeks, iciqScoreRecommendation) VALUES
-('Plano de 4 Semanas para Iniciantes', 'Programa gradual para fortalecer o assoalho pélvico e melhorar o controle urinário ao longo de um mês.', 3, 4, 5),
-('Plano de Manutenção Semanal', 'Rotina semanal para manter os ganhos de força e flexibilidade do assoalho pélvico.', 2, 8, 8);
+INSERT INTO workoutPlan (name, description, daysPerWeek, totalWeeks, iciqScoreMin, iciqScoreMax, ageMin, ageMax) VALUES
+('Plano de 4 Semanas para Iniciantes', 'Programa gradual para fortalecer o assoalho pélvico e melhorar o controle urinário ao longo de um mês.', 3, 4, 2, 7, 18, 65),
+('Plano de Manutenção Semanal', 'Rotina semanal para manter os ganhos de força e flexibilidade do assoalho pélvico.', 2, 8, 6, 15, 18, 65);
 GO
 
 INSERT INTO workoutPlanWorkout (workoutPlanId, workoutId, workoutOrder) VALUES

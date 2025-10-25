@@ -62,6 +62,8 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("/workout/plan")
     @Operation(summary = "Obter Plano de Treino", description = "Recuperar o plano de treino de um usuário")
+    @ApiResponse(responseCode = "200", description = "Plano de treino recuperado com sucesso")
+    @ApiResponse(responseCode = "204", description = "Nenhum plano de treino ativo encontrado para o usuário")
     fun getWorkoutPlan(@RequestHeader("x-user-id") userId: Long): ResponseEntity<UserWorkoutPlanDTO> {
         return ResponseEntity.ok(userService.getWorkoutPlan(userId))
     }

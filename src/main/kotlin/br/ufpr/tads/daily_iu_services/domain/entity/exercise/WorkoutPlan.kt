@@ -21,7 +21,10 @@ data class WorkoutPlan(
     var description: String,
     var daysPerWeek: Int,
     var totalWeeks: Int,
-    var iciqScoreRecommendation: Int,
+    var iciqScoreMin: Int,
+    var iciqScoreMax: Int,
+    var ageMin: Int,
+    var ageMax: Int,
 
     @OneToMany(mappedBy = "workoutPlan", cascade = [CascadeType.ALL], orphanRemoval = true)
     val workouts: MutableList<WorkoutPlanWorkout> = mutableListOf(),

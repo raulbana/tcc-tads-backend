@@ -5,5 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface WorkoutPlanRepository : JpaRepository<WorkoutPlan, Long>{
+interface WorkoutPlanRepository : JpaRepository<WorkoutPlan, Long> {
+    fun findByAgeMinLessThanEqualAndAgeMaxGreaterThanEqualAndIciqScoreMinLessThanEqualAndIciqScoreMaxGreaterThanEqual(
+        ageLower: Int,
+        ageUpper: Int,
+        iciqLower: Int,
+        iciqUpper: Int
+    ): List<WorkoutPlan>
 }

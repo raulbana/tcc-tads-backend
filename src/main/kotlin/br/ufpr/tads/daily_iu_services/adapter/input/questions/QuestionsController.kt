@@ -1,12 +1,16 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.questions
 
+import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.OnboardCompleteDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.OnboardSubmitDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.QuestionDTO
 import br.ufpr.tads.daily_iu_services.domain.service.QuestionService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -17,13 +21,13 @@ class QuestionsController(private val service: QuestionService) {
 
     @GetMapping("/onboard")
     @Operation(summary = "Obter perguntas iniciais", description = "Recupera as perguntas iniciais do onboarding")
-    fun getInitialQuestions(): ResponseEntity<List<QuestionDTO>>{
+    fun getInitialQuestions(): ResponseEntity<List<QuestionDTO>> {
         return ResponseEntity.ok(service.getInitialQuestions())
     }
 
     @PostMapping("/onboard")
     @Operation(summary = "Enviar respostas do onboarding", description = "Envia as respostas para as perguntas do questionário de onboarding")
-    fun submitOnboardingAnswers() {
-        TODO("Not yet implemented")
+    fun submitOnboardingAnswers(@RequestBody @Valid request: OnboardSubmitDTO): ResponseEntity<OnboardCompleteDTO> {
+        return ResponseEntity.ok(service.submitOnboardingAnswers(request))
     }
 }

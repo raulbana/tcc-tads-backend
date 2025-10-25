@@ -1,5 +1,6 @@
 package br.ufpr.tads.daily_iu_services.domain.entity.user
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -14,10 +15,16 @@ class PatientProfile (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
     val birthDate: LocalDate,
-    val gender: String
-    /*
-    val q1Score: Double,
-    val q2Score: Double,
-    val q3Score: Double,
-    val q4Score: Double*/
+    val gender: String,
+
+    var iciq3answer: Int,
+    var iciq4answer: Int,
+    var iciq5answer: Int,
+    var iciqScore: Int,
+    var urinationLoss: String,
+
+    @Column(insertable = false, updatable = false)
+    val createdAt: LocalDate = LocalDate.now(),
+    @Column(insertable = false, updatable = false)
+    val updatedAt: LocalDate = LocalDate.now()
 )

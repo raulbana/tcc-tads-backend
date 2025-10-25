@@ -197,7 +197,10 @@ CREATE TABLE IF NOT EXISTS workoutPlan (
     description VARCHAR(10000) DEFAULT NULL,
     daysPerWeek INT NOT NULL,
     totalWeeks INT NOT NULL,
-    iciqScoreRecommendation INT NOT NULL,
+    iciqScoreMin INT NOT NULL,
+    iciqScoreMax INT NOT NULL,
+    ageMin INT NOT NULL,
+    ageMax INT NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP()
 );
 

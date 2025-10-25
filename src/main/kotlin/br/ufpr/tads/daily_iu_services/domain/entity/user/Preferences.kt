@@ -20,5 +20,5 @@ class Preferences (
     var reminderWorkout: Boolean,
     var reminderWorkoutSchedule: LocalTime?,
     var encouragingMessages: Boolean,
-    var workoutMediaType: String
+    var notificationToken: String
 )

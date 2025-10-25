@@ -23,5 +23,17 @@ data class WorkoutPlanCreatorDTO(
 
     @field:NotNull
     @field:Min(1)
-    val iciqScoreRecommendation: Int
+    val iciqScoreMin: Int,
+
+    @field:NotNull
+    @field:Max(12, message = "Casos com ICIQ acima de 12 devem ser avaliados por um profissional de saúde.")
+    val iciqScoreMax: Int,
+
+    @field:NotNull
+    @field:Min(12, message = "Idade mínima para indicação de um plano de treino é 12 anos.")
+    val ageMin: Int,
+
+    @field:NotNull
+    @field:Max(120, message = "Idade máxima para indicação de um plano de treino é 120 anos.")
+    val ageMax: Int,
 )
