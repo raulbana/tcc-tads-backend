@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
     description = "DTO para envio das respostas do questionário de onboarding",
     example = """
     {
+        "userId": 1,
         "answers": {
             "birthdate": "1990-05-15",
             "q3_frequency": "3",
@@ -17,6 +18,8 @@ import io.swagger.v3.oas.annotations.media.Schema
     """
 )
 data class OnboardSubmitDTO(
+    val userId: Long?,
+
     @field:OnboardSubmission
     val answers: Map<String, String>
 )

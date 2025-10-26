@@ -9,6 +9,5 @@ data class PreferencesDTO(
     val reminderCalendarSchedule: LocalTime?,
     val reminderWorkout: Boolean,
     val reminderWorkoutSchedule: LocalTime?,
-    val encouragingMessages: Boolean,
-    val workoutMediaType: String
+    val encouragingMessages: Boolean
 )

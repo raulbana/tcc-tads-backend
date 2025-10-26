@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository
 interface UserWorkoutPlanRepository: JpaRepository<UserWorkoutPlan, Long> {
 
     fun findByUserAndCompletedFalse(user: User): UserWorkoutPlan?
+
+    fun findByUser(user: User): List<UserWorkoutPlan>
 }

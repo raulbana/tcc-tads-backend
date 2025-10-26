@@ -87,8 +87,33 @@ class GlobalExceptionHandler {
                 Message(
                     HttpStatus.BAD_REQUEST.value(),
                     ExceptionOrigin.REQUEST.origin,
-                    "Erros de validação",
+                    "Erros de validação nos parâmetros de entrada",
                     errors
+                )
+            )
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<Message> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                Message(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ExceptionOrigin.REQUEST.origin,
+                    "Erros de validação nos parâmetros de entrada",
+                    listOf(ex.message ?: "Argumento ilegal fornecido")
+                )
+            )
+    }
+
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalStateException(ex: IllegalStateException): ResponseEntity<Message> {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(
+                Message(
+                    HttpStatus.CONFLICT.value(),
+                    ExceptionOrigin.REQUEST.origin,
+                    ex.message ?: "Estado ilegal"
                 )
             )
     }

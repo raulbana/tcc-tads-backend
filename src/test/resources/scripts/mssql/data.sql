@@ -77,9 +77,9 @@ INSERT INTO patientProfile (birthDate, gender, iciq3answer, iciq4answer, iciq5an
 ('1990-10-20', 'F', 2, 2, 6, 10, '2,3,4,5');
 GO
 
-INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalendarSchedule, reminderWorkout, reminderWorkoutSchedule, encouragingMessages, workoutMediaType) VALUES
-(0, 0, 1, '09:00', 1, '18:00', 1, 'VIDEO'),
-(1, 1, 0, NULL, 0, NULL, 1, 'IMAGE');
+INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalendarSchedule, reminderWorkout, reminderWorkoutSchedule, encouragingMessages) VALUES
+(0, 0, 1, '09:00', 1, '18:00', 1),
+(1, 1, 0, NULL, 0, NULL, 1);
 
 INSERT INTO role(description, permissionLevel, reason, hasDocument) VALUES
 ('Usuário comum', 1, 'Acesso padrão ao aplicativo.', 0),

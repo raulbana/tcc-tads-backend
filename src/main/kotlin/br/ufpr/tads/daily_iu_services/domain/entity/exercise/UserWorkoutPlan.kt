@@ -20,20 +20,20 @@ data class UserWorkoutPlan(
 
     @OneToOne
     @JoinColumn(name = "userId", referencedColumnName = "id")
-    val user: User,
+    val user: User? = null,
 
     @OneToOne
     @JoinColumn(name = "workoutPlanId", referencedColumnName = "id")
     val plan: WorkoutPlan,
 
     var startDate: LocalDateTime,
-    var endDate: LocalDateTime?,
-    var totalProgress: Int,
-    var weekProgress: Int,
-    var currentWeek: Int,
-    var nextWorkout: Int?,
-    var lastWorkoutDate: LocalDateTime?,
-    var completed: Boolean,
+    var endDate: LocalDateTime? = null,
+    var totalProgress: Int = 0,
+    var weekProgress: Int = 0,
+    var currentWeek: Int = 1,
+    var nextWorkout: Int? = 1,
+    var lastWorkoutDate: LocalDateTime? = null,
+    var completed: Boolean = false,
 
     @Column(updatable = false, insertable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),

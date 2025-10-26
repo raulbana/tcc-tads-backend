@@ -6,6 +6,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ExerciseFeedbackCre
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginRequestDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginResponseDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.WorkoutCompletionDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.mapper.UserMapper
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.ExerciseFeedbackRepository
@@ -14,12 +15,14 @@ import br.ufpr.tads.daily_iu_services.adapter.output.user.MailClient
 import br.ufpr.tads.daily_iu_services.adapter.output.user.OTPRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.UserRepository
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseFeedback
+import br.ufpr.tads.daily_iu_services.domain.entity.exercise.UserWorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Credential
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
 import br.ufpr.tads.daily_iu_services.exception.NoContentException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
+import java.lang.IllegalArgumentException
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -124,7 +127,17 @@ class UserService (
         return ExerciseMapper.INSTANCE.userWorkoutPlanEntityToDTO(userWorkoutPlan)
     }
 
-    fun logWorkoutCompletion(userId: Long, request: List<WorkoutCompletionDTO>) {
+    fun hasActiveWorkoutPlan(user: User): Boolean {
+        val userWorkoutPlan = userWorkoutPlanRepository.findByUserAndCompletedFalse(user)
+
+        return userWorkoutPlan != null
+    }
+
+    fun logWorkoutCompletion(userId: Long, request: List<WorkoutCompletionDTO>): UserWorkoutPlanSimpleDTO {
+        if (request.isEmpty()) {
+            throw IllegalArgumentException("A lista de conclusões de treino não pode estar vazia")
+        }
+
         val user = userRepository.findById(userId).orElseThrow {
             NotFoundException("Usuário com ID $userId não encontrado")
         }
@@ -166,9 +179,10 @@ class UserService (
                 completion.completedAt.toLocalDate(),
                 workoutPlanWorkout.workout.exercises.size
             )
-
-            userWorkoutPlanRepository.save(userWorkoutPlan)
         }
+
+        val savedUserWorkoutPlan = userWorkoutPlanRepository.save(userWorkoutPlan)
+        return ExerciseMapper.INSTANCE.userWorkoutPlanEntityToSimpleDTO(savedUserWorkoutPlan)
     }
 
     fun createWorkoutFeedback(userId: Long, request: List<ExerciseFeedbackCreatorDTO>) {

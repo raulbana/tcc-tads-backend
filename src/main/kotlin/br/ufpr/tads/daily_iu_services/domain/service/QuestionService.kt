@@ -7,11 +7,16 @@ import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.QuestionDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.mapper.QuestionMapper
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.mapper.UserMapper
+import br.ufpr.tads.daily_iu_services.adapter.output.exercise.UserWorkoutPlanRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.WorkoutPlanRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.questions.QuestionsRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.PatientProfileRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.user.UserRepository
+import br.ufpr.tads.daily_iu_services.domain.entity.exercise.UserWorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.WorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.user.PatientProfile
+import br.ufpr.tads.daily_iu_services.domain.entity.user.User
+import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,7 +25,10 @@ import java.time.format.DateTimeFormatter
 @Service
 class QuestionService(
     private val repository: QuestionsRepository,
+    private val userRepository: UserRepository,
+    private val userService: UserService,
     private val workoutPlanService: WorkoutPlanService,
+    private val userWorkoutPlanRepository: UserWorkoutPlanRepository,
     private val patientProfileRepository: PatientProfileRepository
 ) {
 
@@ -30,57 +38,73 @@ class QuestionService(
 
     fun submitOnboardingAnswers(request: OnboardSubmitDTO): OnboardCompleteDTO {
         val birthDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-        val birthdate = request.answers["birthdate"]
-        val q3Frequency = request.answers["q3_frequency"]
-        val q4Amount = request.answers["q4_amount"]
-        val q5Interference = request.answers["q5_interference"]
-
-        if (birthdate == null || q3Frequency == null || q4Amount == null || q5Interference == null) {
-            throw IllegalArgumentException("Missing required answers")
+        val user: User? = request.userId?.let {
+            userRepository.findById(it).orElseThrow {
+                NotFoundException("Usuário com id ${request.userId} não encontrado")
+            }
         }
 
-        val birthDate = LocalDate.parse(birthdate, birthDateFormat)
-        val age = calculateAge(birthDate)
-        val q3Int = q3Frequency.toIntOrNull() ?: 0
-        val q4Int = q4Amount.toIntOrNull() ?: 0
-        val q5Int = q5Interference.toIntOrNull() ?: 0
+        if (user == null || !userService.hasActiveWorkoutPlan(user)) {
+            val birthdate = request.answers["birthdate"]
+            val q3Frequency = request.answers["q3_frequency"]
+            val q4Amount = request.answers["q4_amount"]
+            val q5Interference = request.answers["q5_interference"]
 
-        val iciqScore = q3Int + q4Int + q5Int
-
-        val profile = PatientProfile(
-            birthDate = birthDate,
-            gender = request.answers["gender"] ?: "N",
-            iciq3answer = q3Int,
-            iciq4answer = q4Int,
-            iciq5answer = q5Int,
-            iciqScore = iciqScore,
-            urinationLoss = request.answers["q6_when"] ?: ""
-        )
-
-        patientProfileRepository.save(profile)
-
-        val recommendedWorkoutPlans = workoutPlanService.findSuitableWorkoutPlans(age, iciqScore)
-        val bestPlan: UserWorkoutPlanDTO? = filterBestSuitablePlan(recommendedWorkoutPlans, age, iciqScore)
-            ?.let {
-                UserWorkoutPlanDTO(
-                    id = null,
-                    plan = ExerciseMapper.INSTANCE.workoutPlanEntityToDTO(it),
-                    startDate = LocalDateTime.now(),
-                    endDate = null,
-                    totalProgress = 0,
-                    weekProgress = 0,
-                    currentWeek = 1,
-                    nextWorkout = 1,
-                    lastWorkoutDate = null,
-                    completed = false
-                )
+            if (birthdate == null || q3Frequency == null || q4Amount == null || q5Interference == null) {
+                throw IllegalArgumentException("Perguntas obrigatórias ausentes")
             }
 
-        return OnboardCompleteDTO(
-            profile = UserMapper.INSTANCE.patientProfileToPatientProfileDTO(profile),
-            workoutPlan = bestPlan
-        )
+            val birthDate = LocalDate.parse(birthdate, birthDateFormat)
+            val age = calculateAge(birthDate)
+            val q3Int = q3Frequency.toIntOrNull() ?: 0
+            val q4Int = q4Amount.toIntOrNull() ?: 0
+            val q5Int = q5Interference.toIntOrNull() ?: 0
+
+            val iciqScore = q3Int + q4Int + q5Int
+
+            val profile = if (user != null) {
+                user.profile.iciq3answer = q3Int
+                user.profile.iciq4answer = q4Int
+                user.profile.iciq5answer = q5Int
+                user.profile.iciqScore = iciqScore
+                user.profile.urinationLoss = request.answers["q6_when"] ?: ""
+
+                user.profile
+            } else {
+                PatientProfile(
+                    birthDate = birthDate,
+                    gender = request.answers["gender"] ?: "N",
+                    iciq3answer = q3Int,
+                    iciq4answer = q4Int,
+                    iciq5answer = q5Int,
+                    iciqScore = iciqScore,
+                    urinationLoss = request.answers["q6_when"] ?: ""
+                )
+            }
+            patientProfileRepository.save(profile)
+
+            val recommendedWorkoutPlans = workoutPlanService.findSuitableWorkoutPlans(age, iciqScore)
+            val bestPlan: UserWorkoutPlanDTO? = filterBestSuitablePlan(recommendedWorkoutPlans, age, iciqScore)
+                ?.let {
+                    val uwp = UserWorkoutPlan(
+                        plan = it,
+                        user = user,
+                        startDate = LocalDateTime.now(),
+                    )
+
+                    if (user != null) {
+                        userWorkoutPlanRepository.save(uwp)
+                    }
+
+                    ExerciseMapper.INSTANCE.userWorkoutPlanEntityToDTO(uwp)
+                }
+
+            return OnboardCompleteDTO(
+                profile = UserMapper.INSTANCE.patientProfileToPatientProfileDTO(profile),
+                workoutPlan = bestPlan
+            )
+        }
+        throw IllegalStateException("Usuário já possui um plano de treino ativo, por favor complete o plano atual antes de realizar a avaliação novamente.")
     }
 
     private fun filterBestSuitablePlan(plans: List<WorkoutPlan>, age: Int, iciqScore: Int): WorkoutPlan? {

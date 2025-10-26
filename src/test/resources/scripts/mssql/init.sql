@@ -258,7 +258,6 @@ CREATE TABLE userWorkoutPlan (
     completed BIT NOT NULL DEFAULT 0,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
-    UNIQUE (userId, workoutPlanId),
     FOREIGN KEY (userId) REFERENCES appUser(id),
     FOREIGN KEY (workoutPlanId) REFERENCES workoutPlan(id)
 );

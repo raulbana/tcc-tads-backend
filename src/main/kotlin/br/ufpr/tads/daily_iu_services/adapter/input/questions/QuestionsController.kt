@@ -5,6 +5,8 @@ import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.OnboardSubmitD
 import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.QuestionDTO
 import br.ufpr.tads.daily_iu_services.domain.service.QuestionService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -27,6 +29,10 @@ class QuestionsController(private val service: QuestionService) {
 
     @PostMapping("/onboard")
     @Operation(summary = "Enviar respostas do onboarding", description = "Envia as respostas para as perguntas do questionário de onboarding")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "Respostas enviadas com sucesso"),
+        ApiResponse(responseCode = "409", description = "Usuário já possui um plano de treino ativo")
+    )
     fun submitOnboardingAnswers(@RequestBody @Valid request: OnboardSubmitDTO): ResponseEntity<OnboardCompleteDTO> {
         return ResponseEntity.ok(service.submitOnboardingAnswers(request))
     }
