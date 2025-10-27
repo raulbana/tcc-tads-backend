@@ -2,12 +2,13 @@ package br.ufpr.tads.daily_iu_services.adapter.output.user
 
 import br.ufpr.tads.daily_iu_services.adapter.input.contact.dto.ContactDTO
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Content
-import br.ufpr.tads.daily_iu_services.domain.entity.content.Report
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
+import br.ufpr.tads.daily_iu_services.domain.entity.user.User
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class MailClient(private val mailSender: JavaMailSender) {
@@ -26,6 +27,19 @@ class MailClient(private val mailSender: JavaMailSender) {
         message.setCc(email.userEmail)
         message.subject = email.subject
         message.text = email.text
+
+        mailSender.send(message)
+    }
+
+    fun sendProfessionalRequestEmail(user: User, reason: String) {
+        val message = SimpleMailMessage()
+        val date = LocalDate.now()
+        message.from = noreplyEmail
+        message.setTo(supportEmail)
+        message.replyTo = user.email
+        message.setCc(user.email)
+        message.subject = "Daily IU - Solicitação Profissional"
+        message.text = "O usuário ${user.name} (e-mail: ${user.email}) solicitou uma conta profissional.\n\nMotivo:\n$reason\n\nData da solicitação: $date"
 
         mailSender.send(message)
     }
@@ -51,13 +65,13 @@ class MailClient(private val mailSender: JavaMailSender) {
         mailSender.send(message)
     }
 
-    fun sendUserBanWarning(userEmail: String, reportCount: Long) {
+    fun sendUserBanWarning(userEmail: String, strikeCount: Long) {
         val message = SimpleMailMessage()
         message.from = noreplyEmail
         message.setTo(userEmail)
         message.setCc(supportEmail)
         message.subject = "Daily IU - Aviso de banimento de usuário"
-        message.text = "Sua conta recebeu $reportCount denúncias e está sob revisão. Durante esse período, sua conta será temporariamente suspensa. Por favor, revise nossas diretrizes comunitárias para evitar futuras suspensões."
+        message.text = "Sua conta recebeu $strikeCount advertências devido a violações das diretrizes da comunidade. Por razoes de segurança e para manter a integridade da plataforma, sua conta foi temporariamente suspensa. Por favor, revise nossas diretrizes comunitárias para evitar futuras suspensões.\n\nSe você acredita que isso foi um erro, entre em contato com nossa equipe de suporte."
 
         mailSender.send(message)
     }
