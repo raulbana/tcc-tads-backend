@@ -19,8 +19,8 @@ data class MediaDTO(
     @field:NotNull("O contentSize não pode ser nulo")
     val contentSize: Long,
 
-    @field:NotBlank(message = "O texto alternativo não pode ser vazio")
-    val altText: String,
+    val altText: String?,
+
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val createdAt: LocalDateTime?
 )

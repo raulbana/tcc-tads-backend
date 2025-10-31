@@ -16,9 +16,9 @@ class Preferences (
     var highContrast: Boolean,
     var bigFont: Boolean,
     var reminderCalendar: Boolean,
-    var reminderCalendarSchedule: LocalTime?,
+    var reminderCalendarSchedule: LocalTime? = null,
     var reminderWorkout: Boolean,
-    var reminderWorkoutSchedule: LocalTime?,
+    var reminderWorkoutSchedule: LocalTime? = null,
     var encouragingMessages: Boolean,
-    var notificationToken: String
+    var notificationToken: String = ""
 )

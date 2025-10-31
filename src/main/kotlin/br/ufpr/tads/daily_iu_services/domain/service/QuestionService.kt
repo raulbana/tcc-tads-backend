@@ -5,6 +5,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.OnboardComplet
 import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.OnboardSubmitDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.QuestionDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.questions.dto.mapper.QuestionMapper
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanCreatorDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.mapper.UserMapper
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.UserWorkoutPlanRepository
@@ -62,14 +63,14 @@ class QuestionService(
 
             val iciqScore = q3Int + q4Int + q5Int
 
-            val profile = if (user != null) {
-                user.profile.iciq3answer = q3Int
-                user.profile.iciq4answer = q4Int
-                user.profile.iciq5answer = q5Int
-                user.profile.iciqScore = iciqScore
-                user.profile.urinationLoss = request.answers["q6_when"] ?: ""
+            val profile: PatientProfile = if (user != null && user.profile != null) {
+                user.profile!!.iciq3answer = q3Int
+                user.profile!!.iciq4answer = q4Int
+                user.profile!!.iciq5answer = q5Int
+                user.profile!!.iciqScore = iciqScore
+                user.profile!!.urinationLoss = request.answers["q6_when"] ?: ""
 
-                user.profile
+                user.profile!!
             } else {
                 PatientProfile(
                     birthDate = birthDate,
@@ -100,7 +101,7 @@ class QuestionService(
                 }
 
             return OnboardCompleteDTO(
-                profile = UserMapper.INSTANCE.patientProfileToPatientProfileDTO(profile),
+                profile = UserMapper.INSTANCE.patientProfileToPatientProfileDTO(profile)!!,
                 workoutPlan = bestPlan
             )
         }

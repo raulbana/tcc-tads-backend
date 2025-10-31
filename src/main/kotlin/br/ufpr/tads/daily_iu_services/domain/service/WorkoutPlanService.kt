@@ -7,6 +7,7 @@ import br.ufpr.tads.daily_iu_services.adapter.output.exercise.WorkoutPlanReposit
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.WorkoutRepository
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.WorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.WorkoutPlanWorkout
+import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,6 +19,11 @@ class WorkoutPlanService(
     fun listWorkoutPlans(): List<WorkoutPlanDTO> {
         val workoutPlans = workoutPlanRepository.findAll()
         return workoutPlans.map { ExerciseMapper.INSTANCE.workoutPlanEntityToDTO(it) }
+    }
+
+    fun getWorkoutPlanById(id: Long): WorkoutPlan? {
+        val workoutPlan: WorkoutPlan? = workoutPlanRepository.findById(id).orElse(null)
+        return workoutPlan
     }
 
     fun createWorkoutPlan(request: WorkoutPlanCreatorDTO): WorkoutPlanDTO {

@@ -16,6 +16,6 @@ class Media(
     val url: String,
     val contentType: String,
     val contentSize: Long,
-    var altText: String,
+    var altText: String?,
     var createdAt: LocalDateTime
 )

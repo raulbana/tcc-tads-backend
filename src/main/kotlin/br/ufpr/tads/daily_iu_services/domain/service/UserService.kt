@@ -5,12 +5,19 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ChangePasswordDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ExerciseFeedbackCreatorDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginRequestDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginResponseDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.RoleCreatorDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserCreatorDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserEditorDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserSimpleDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanCreatorDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.WorkoutCompletionDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.mapper.UserMapper
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.ExerciseFeedbackRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.UserWorkoutPlanRepository
+import br.ufpr.tads.daily_iu_services.adapter.output.media.MediaRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.MailClient
 import br.ufpr.tads.daily_iu_services.adapter.output.user.OTPRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.user.UserRepository
@@ -18,6 +25,8 @@ import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseFeedback
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.UserWorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Credential
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
+import br.ufpr.tads.daily_iu_services.domain.entity.user.Preferences
+import br.ufpr.tads.daily_iu_services.domain.entity.user.Role
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
 import br.ufpr.tads.daily_iu_services.exception.NoContentException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
@@ -28,27 +37,138 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class UserService (
+class UserService(
     private val passwordService: PasswordService,
     private val tokenService: TokenJWTService,
     private val calendarService: CalendarService,
+    private val workoutPlanService: WorkoutPlanService,
     private val userRepository: UserRepository,
     private val otpRepository: OTPRepository,
+    private val mediaRepository: MediaRepository,
     private val userWorkoutPlanRepository: UserWorkoutPlanRepository,
     private val exerciseFeedbackRepository: ExerciseFeedbackRepository,
     private val mailClient: MailClient
 ) {
 
-    fun createUser() {
-        TODO("Not yet implemented")
+    fun createUser(request: UserCreatorDTO, userId: Long?): UserDTO {
+        val creator = userId?.let {
+            userRepository.findById(it).orElseThrow {
+                NotFoundException("Usuário criador com ID $it não encontrado")
+            }
+        }
+
+        val role = if (creator != null && (creator.role.permissionLevel < 3)) {
+            // Se o usuário criador não for admin (permissão nível 3), não pode criar usuários
+            throw IllegalArgumentException("Usuário com ID ${creator.id} não tem permissão para criar outros usuários.")
+        } else if (creator == null) {
+            // Se o usuário criador for nulo, o usuário está se auto-registrando, então só pode criar usuários com permissão nível 1
+            geraRoleDefault()
+        } else {
+            // Se o criador for admin, mas não forneceu uma role, atribui a role padrão (nível 1)
+            if (request.role == null) geraRoleDefault() else geraRoleFromDTO(request.role, creator)
+        }
+
+        val salt = passwordService.generateSalt()
+        val credential = Credential(
+            passwordHash = passwordService.hashPassword(request.password, salt),
+            salt = salt
+        )
+
+        val patientProfile = UserMapper.INSTANCE.patientProfileDTOToPatientProfile(request.profile)
+        val preferences = UserMapper.INSTANCE.preferencesDTOToPreferences(request.preferences) ?: Preferences(
+            highContrast = false,
+            bigFont = false,
+            reminderWorkout = false,
+            reminderCalendar = false,
+            encouragingMessages = false
+        )
+
+        val profilePicture = UserMapper.INSTANCE.mediaDTOToEntity(request.profilePicture)
+            ?.let { if (it.id == null) mediaRepository.save(it) else it }
+
+        val newUser = User(
+            name = request.name,
+            email = request.email,
+            profilePicture = profilePicture,
+            profile = patientProfile,
+            credential = credential,
+            preferences = preferences,
+            role = role
+        )
+
+        val savedUser = userRepository.save(newUser)
+
+        if (request.workoutPlan != null) {
+            assignWorkoutPlanToUser(savedUser, request.workoutPlan)
+        }
+
+        return UserMapper.INSTANCE.userToUserDTO(savedUser)
     }
 
-    fun updateUser() {
-        TODO("Not yet implemented")
+    private fun geraRoleDefault(): Role {
+        return Role(
+            description = "Usuário comum",
+            permissionLevel = 1,
+            reason = "Acesso padrão ao aplicativo.",
+            conceivedBy = null,
+            conceivedAt = LocalDateTime.now()
+        )
     }
 
-    fun getUserById(id: Long) {
-        TODO("Not yet implemented")
+    private fun geraRoleFromDTO(request: RoleCreatorDTO, creator: User): Role {
+        return Role(
+            description = request.description,
+            permissionLevel = request.permissionLevel,
+            reason = request.reason,
+            hasDocument = true,
+            documentType = request.documentType,
+            documentValue = request.documentValue,
+            conceivedBy = creator,
+            conceivedAt = LocalDateTime.now()
+        )
+    }
+
+    private fun assignWorkoutPlanToUser(user: User, assignment: UserWorkoutPlanCreatorDTO) {
+        val workoutPlan = workoutPlanService.getWorkoutPlanById(assignment.planId)
+        if (workoutPlan != null) {
+            val userWorkoutPlan = UserWorkoutPlan(
+                plan = workoutPlan,
+                user = user,
+                startDate = assignment.startDate,
+                endDate = assignment.endDate,
+                totalProgress = assignment.totalProgress,
+                weekProgress = assignment.weekProgress,
+                currentWeek = assignment.currentWeek,
+                completed = assignment.completed
+            )
+            userWorkoutPlanRepository.save(userWorkoutPlan)
+        }
+    }
+
+    fun updateUser(id: Long, request: UserEditorDTO): UserDTO {
+        val user = userRepository.findById(id).orElseThrow {
+            NotFoundException("Usuário com ID $id não encontrado")
+        }
+
+        val profilePicture = UserMapper.INSTANCE.mediaDTOToEntity(request.profilePicture)
+            ?.let { if (it.id == null) mediaRepository.save(it) else it }
+
+        if (request.name != null) user.name = request.name
+
+        if (request.email != null) user.email = request.email
+
+        if (request.profilePicture != null) user.profilePicture = profilePicture
+
+        val updatedUser = userRepository.save(user)
+        return UserMapper.INSTANCE.userToUserDTO(updatedUser)
+    }
+
+    fun getUserById(id: Long): UserSimpleDTO {
+        val user = userRepository.findById(id).orElseThrow {
+            NotFoundException("Usuário com ID $id não encontrado")
+        }
+
+        return UserMapper.INSTANCE.userToUserSimpleDTO(user)
     }
 
     fun login(requestDTO: LoginRequestDTO): LoginResponseDTO {

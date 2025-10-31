@@ -5,6 +5,10 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.ChangePasswordDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginRequestDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.LoginResponseDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserCreatorDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserEditorDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserWorkoutPlanSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.WorkoutCompletionDTO
 import br.ufpr.tads.daily_iu_services.domain.service.UserService
@@ -14,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -24,20 +29,21 @@ class UserController(private val userService: UserService) {
 
     @PostMapping
     @Operation(summary = "Criar Usuário", description = "Criar uma nova conta de usuário")
-    fun createUser() {
-        TODO("Not yet implemented")
+    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso")
+    fun createUser(@RequestBody @Valid request: UserCreatorDTO, @RequestHeader(value = "x-user-id", required = false) userId: Long?): ResponseEntity<UserDTO> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request, userId))
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @Operation(summary = "Atualizar Usuário", description = "Atualizar uma conta de usuário existente")
-    fun updateUser() {
-        TODO("Not yet implemented")
+    fun updateUser(@PathVariable("id") id: Long, @RequestBody @Valid request: UserEditorDTO): ResponseEntity<UserDTO> {
+        return ResponseEntity.ok(userService.updateUser(id, request))
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar Usuário por ID", description = "Recupera os detalhes do usuário pelo ID do usuário")
-    fun getUserById(@PathVariable id: Long) {
-        TODO("Not yet implemented")
+    fun getUserById(@PathVariable("id") id: Long): ResponseEntity<UserSimpleDTO> {
+        return ResponseEntity.ok(userService.getUserById(id))
     }
 
     @PostMapping("/login")
