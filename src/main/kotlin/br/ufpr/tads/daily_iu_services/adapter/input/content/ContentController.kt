@@ -41,18 +41,29 @@ class ContentController(private val service: ContentService) {
     @Operation(summary = "Repostar Conteúdo", description = "Repostar uma publicação de conteúdo existente pelo ID")
     fun repostContent(
         @PathVariable("id") id: Long,
-        @RequestBody @Valid request: ContentRepostDTO): ResponseEntity<ContentDTO> {
+        @RequestBody @Valid request: ContentRepostDTO
+    ): ResponseEntity<ContentDTO> {
         return ResponseEntity.ok(service.repostContent(id, request))
     }
 
     @GetMapping
-    @Operation(summary = "Obter Conteúdos", description = "Recupera publicações de conteúdo para um usuário. Se o cabeçalho 'x-profile' for verdadeiro, busca conteúdos específicos do perfil com base no ID do usuário, caso contrário, busca publicações recomendadas para o usuário.")
-    fun getContents(@RequestHeader("x-user-id") userId: Long, @RequestHeader("x-profile", required = false) profile: Boolean): ResponseEntity<List<ContentSimpleDTO>> {
-        return ResponseEntity.ok(service.getContents(userId))
+    @Operation(
+        summary = "Obter Conteúdos",
+        description = "Recupera publicações de conteúdo para um usuário. Se o cabeçalho 'x-profile' for verdadeiro, busca conteúdos específicos do perfil com base no ID do usuário, caso contrário, busca publicações recomendadas para o usuário."
+    )
+    fun getContents(
+        @RequestHeader(value = "x-user-id") userId: Long,
+        @RequestHeader(value = "x-profile", required = false) profile: Boolean?,
+        @RequestHeader(value = "page", required = false) page: Int?
+    ): ResponseEntity<List<ContentSimpleDTO>> {
+        return ResponseEntity.ok(service.getContents(userId, profile ?: false, page ?: 0))
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obter Conteúdo por ID", description = "Recupera uma publicação de conteúdo específica pelo seu ID")
+    @Operation(
+        summary = "Obter Conteúdo por ID",
+        description = "Recupera uma publicação de conteúdo específica pelo seu ID"
+    )
     fun getContentById(
         @PathVariable("id") id: Long,
         @RequestHeader("x-user-id") userId: Long
@@ -71,7 +82,10 @@ class ContentController(private val service: ContentService) {
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Curtir/Descurtir Conteúdo", description = "Alterna o status de curtida para uma publicação de conteúdo específica pelo seu ID")
+    @Operation(
+        summary = "Curtir/Descurtir Conteúdo",
+        description = "Alterna o status de curtida para uma publicação de conteúdo específica pelo seu ID"
+    )
     @ApiResponse(responseCode = "204", description = "Operação realizada com sucesso, sem conteúdo na resposta")
     fun toggleLikeContent(@PathVariable("id") id: Long, @RequestBody toggle: ToggleDTO): ResponseEntity<Void> {
         service.toggleLikeContent(id, toggle)
@@ -95,7 +109,10 @@ class ContentController(private val service: ContentService) {
     }
 
     @PatchMapping("/{id}/save")
-    @Operation(summary = "Salvar/Remover dos Salvos", description = "Alterna o status de salvo para uma publicação de conteúdo específica pelo seu ID")
+    @Operation(
+        summary = "Salvar/Remover dos Salvos",
+        description = "Alterna o status de salvo para uma publicação de conteúdo específica pelo seu ID"
+    )
     @ApiResponse(responseCode = "204", description = "Operação realizada com sucesso, sem conteúdo na resposta")
     fun toggleSaveContent(@PathVariable("id") id: Long, @RequestBody toggle: ToggleDTO): ResponseEntity<Void> {
         service.toggleSaveContent(id, toggle)
@@ -103,7 +120,10 @@ class ContentController(private val service: ContentService) {
     }
 
     @GetMapping("/saved")
-    @Operation(summary = "Obter Conteúdos salvos", description = "Recupera publicações de conteúdo salvos por um usuário.")
+    @Operation(
+        summary = "Obter Conteúdos salvos",
+        description = "Recupera publicações de conteúdo salvos por um usuário."
+    )
     fun getSavedContents(@RequestHeader("x-user-id") userId: Long): ResponseEntity<List<ContentSimpleDTO>> {
         return ResponseEntity.ok(service.listSavedContents(userId))
     }

@@ -23,6 +23,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.content.Report
 import br.ufpr.tads.daily_iu_services.domain.entity.content.SavedContent
 import br.ufpr.tads.daily_iu_services.exception.NotAllowedException
 import br.ufpr.tads.daily_iu_services.exception.NotFoundException
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -37,11 +38,17 @@ class ContentService(
     private val mailClient: MailClient
 ) {
 
-    fun getContents(userId: Long): List<ContentSimpleDTO> {
-        // TODO: For now, we are not using the userId, but it can be used for personalized content in the future
-        val contents = contentRepository.findAll()
+    fun getContents(userId: Long, profile: Boolean, page: Int): List<ContentSimpleDTO> {
+        val size = 20
 
-        return contents.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
+        if (profile) {
+            val contents = contentRepository.findByAuthorId(userId)
+            return contents.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
+        }
+
+        val pageable = PageRequest.of(page, size)
+        val recommended = contentRepository.findRecommendedByUserLikes(userId, pageable)
+        return recommended.content.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
     }
 
     fun getContentById(id: Long, userId: Long): ContentDTO {

@@ -53,8 +53,11 @@ abstract class ContentMapper {
     @Mapping(target = "updatedAt", source = "content.updatedAt")
     abstract fun contentToDTO(content: Content, userId: Long): ContentDTO
 
+    @Named("mediaToUrl")
+    fun mediaToUrl(media: Media?) = media?.url
+
     @Named("userToAuthorDTO")
-    @Mapping(target = "profilePicture", source = "profilePictureUrl")
+    @Mapping(target = "profilePicture", source = "profilePicture", qualifiedByName = ["mediaToUrl"])
     abstract fun userToAuthorDTO(user: User): AuthorDTO
 
     @Named("getCoverMedia")

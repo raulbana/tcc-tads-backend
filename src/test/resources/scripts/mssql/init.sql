@@ -4,6 +4,19 @@ GO
 USE dailyiu_backend_storage_database;
 GO
 
+-- Tabela para armazenar mídias (imagens, vídeos, etc.)
+CREATE TABLE media (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    url NVARCHAR(255) NOT NULL,
+    contentType NVARCHAR(10) NOT NULL,
+    contentSize BIGINT NOT NULL,
+    altText NVARCHAR(255) DEFAULT NULL,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE()
+);
+GO
+
+--//--//--//--//--//--//--//--//--//--//--//--//--//--//--
+
 CREATE TABLE credential (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     passwordHash NVARCHAR(255) NOT NULL,
@@ -55,13 +68,14 @@ CREATE TABLE appUser (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL,
     email NVARCHAR(100) NOT NULL UNIQUE,
-    profilePictureUrl NVARCHAR(255) DEFAULT NULL,
+    profilePictureId BIGINT DEFAULT NULL,
     credentialId BIGINT NOT NULL,
-    patientProfileId BIGINT NOT NULL,
+    patientProfileId BIGINT DEFAULT NULL,
     preferencesId BIGINT NOT NULL,
     roleId INT NOT NULL,
     strikes INT NOT NULL DEFAULT 0,
     blocked BIT NOT NULL DEFAULT 0,
+    FOREIGN KEY (profilePictureId) REFERENCES media(id),
     FOREIGN KEY (credentialId) REFERENCES credential(id),
     FOREIGN KEY (patientProfileId) REFERENCES patientProfile(id),
     FOREIGN KEY (preferencesId) REFERENCES preferences(id),
@@ -140,16 +154,6 @@ CREATE TABLE urinationData (
 GO
 
 --//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
--- Tabela para armazenar mídias (imagens, vídeos, etc.)
-CREATE TABLE media (
-    id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    url NVARCHAR(255) NOT NULL,
-    contentType NVARCHAR(10) NOT NULL,
-    contentSize BIGINT NOT NULL,
-    altText NVARCHAR(255) NOT NULL,
-    createdAt DATETIME2 NOT NULL DEFAULT GETDATE()
-);
-GO
 
 -- Tabela de exercícios e planos de treino
 
@@ -378,4 +382,88 @@ CREATE TABLE report (
     FOREIGN KEY (contentId) REFERENCES content(id),
     FOREIGN KEY (reportedByUserId) REFERENCES appUser(id)
 );
+GO
+
+-- Stored procedure para recomendar conteúdos com base nas categorias curtidas pelo usuário,
+-- excluindo conteúdos já curtidos, dando bônus a autores cujas publicações o usuário curtiu
+-- e priorizando publicações mais recentes. Suporta paginação (pageNumber e pageSize)
+CREATE PROCEDURE sp_GetRecommendedContents
+    @UserId BIGINT,
+    @PageNumber INT,
+    @PageSize INT,
+    @TotalCount BIGINT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @PageNumber < 1 SET @PageNumber = 1;
+    IF @PageSize <= 0 SET @PageSize = 10;
+
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+
+    -- Usamos uma tabela temporária porque em T-SQL um CTE só pode ser seguido por uma única instrução.
+    -- Primeiro populamos #filtered_contents com os scores, depois obtemos o total e aplicamos paginação.
+
+    WITH liked_authors AS (
+        SELECT DISTINCT c.authorId
+        FROM content c
+        JOIN contentLikes cl ON c.id = cl.contentId
+        WHERE cl.userId = @UserId
+    ),
+    score_by_content AS (
+        SELECT cc.contentId,
+               COUNT(DISTINCT cc.categoryId) AS common_count
+        FROM contentContentCategory cc
+        JOIN contentContentCategory liked_cc ON liked_cc.categoryId = cc.categoryId
+        JOIN contentLikes cl ON cl.contentId = liked_cc.contentId AND cl.userId = @UserId
+        GROUP BY cc.contentId
+    ),
+    filtered_contents AS (
+        SELECT c.id AS contentId,
+               sbc.common_count,
+               (sbc.common_count + CASE WHEN la.authorId IS NOT NULL THEN 1 ELSE 0 END) AS score
+        FROM content c
+        JOIN score_by_content sbc ON sbc.contentId = c.id
+        LEFT JOIN liked_authors la ON la.authorId = c.authorId
+        WHERE c.visible = 1
+          AND NOT EXISTS (SELECT 1 FROM contentLikes cl2 WHERE cl2.contentId = c.id AND cl2.userId = @UserId)
+    )
+    -- Insere o resultado em uma tabela temporária para poder reutilizar em múltiplas instruções
+    SELECT contentId, common_count, score
+    INTO #filtered_contents
+    FROM filtered_contents;
+
+    -- Total de resultados (antes da paginação)
+    SELECT @TotalCount = COUNT(*) FROM #filtered_contents;
+
+    IF @TotalCount > 0
+    BEGIN
+        -- Resultado paginado: selecionar colunas da tabela content e aplicar ordenação por score e data
+        SELECT c.id, c.title, c.description, c.subtitle, c.subContent, c.authorId, c.repost,
+               c.repostFromcontentId, c.repostByAuthorId, c.visible, c.createdAt, c.updatedAt
+        FROM #filtered_contents fc
+        JOIN content c ON c.id = fc.contentId
+        ORDER BY fc.score DESC, c.createdAt DESC
+        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+    END
+    ELSE
+    BEGIN
+        -- Fallback: se não há conteúdos com categorias em comum (usuário sem likes),
+        -- retorna conteúdos visíveis recentes que o usuário ainda não curtiu.
+        SELECT @TotalCount = COUNT(*)
+        FROM content c
+        WHERE c.visible = 1
+          AND NOT EXISTS (SELECT 1 FROM contentLikes cl2 WHERE cl2.contentId = c.id AND cl2.userId = @UserId);
+
+        SELECT c.id, c.title, c.description, c.subtitle, c.subContent, c.authorId, c.repost,
+               c.repostFromcontentId, c.repostByAuthorId, c.visible, c.createdAt, c.updatedAt
+        FROM content c
+        WHERE c.visible = 1
+          AND NOT EXISTS (SELECT 1 FROM contentLikes cl2 WHERE cl2.contentId = c.id AND cl2.userId = @UserId)
+        ORDER BY c.createdAt DESC
+        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+    END
+
+    DROP TABLE #filtered_contents;
+END
 GO
