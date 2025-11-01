@@ -9,6 +9,8 @@ interface ContentReportsRepository: JpaRepository<Report, Long> {
 
     fun countByContentIdAndValidTrue(contentId: Long): Long
 
+    fun findByContentIdAndHandledFalse(contentId: Long): List<Report>
+
     fun existsByContentIdAndReportedByUserIdAndValidTrue(contentId: Long, userId: Long): Boolean
 
 }

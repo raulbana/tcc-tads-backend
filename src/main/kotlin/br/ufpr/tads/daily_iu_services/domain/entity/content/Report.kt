@@ -30,6 +30,8 @@ data class Report(
 
     var valid: Boolean = true,
 
+    var handled: Boolean = false,
+
     @Column(insertable = false, updatable = false)
     val createdAt: LocalDateTime
 )

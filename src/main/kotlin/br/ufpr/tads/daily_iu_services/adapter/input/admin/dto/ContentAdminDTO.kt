@@ -9,7 +9,7 @@ data class ContentAdminDTO(
     val description: String,
     val subtitle: String?,
     val subcontent: String?,
-    val category: String,
+    val categories: List<String>,
     val author: AuthorDTO,
     val media: List<MediaDTO>,
     val reports: List<ContentReportAdminDTO>,

@@ -378,6 +378,7 @@ CREATE TABLE report (
     reportedByUserId BIGINT NOT NULL,
     reason NVARCHAR(MAX) NOT NULL,
     valid BIT NOT NULL DEFAULT 1,
+    handled BIT NOT NULL DEFAULT 0,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (contentId) REFERENCES content(id),
     FOREIGN KEY (reportedByUserId) REFERENCES appUser(id)

@@ -7,4 +7,3 @@ import org.springframework.data.domain.Pageable
 interface ContentRepositoryCustom {
     fun findRecommendedByUserLikes(userId: Long, pageable: Pageable): Page<Content>
 }
-

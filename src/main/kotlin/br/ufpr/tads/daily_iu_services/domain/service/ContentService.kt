@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class ContentService(
+class ContentService (
     private val contentRepository: ContentRepository,
     private val categoryRepository: ContentCategoryRepository,
     private val mediaRepository: MediaRepository,
@@ -38,15 +38,14 @@ class ContentService(
     private val mailClient: MailClient
 ) {
 
-    fun getContents(userId: Long, profile: Boolean, page: Int): List<ContentSimpleDTO> {
-        val size = 20
+    fun getContents(userId: Long, profile: Boolean, page: Int?, size: Int?): List<ContentSimpleDTO> {
+        val pageable = PageRequest.of(page ?: 0, size ?: 20)
 
         if (profile) {
-            val contents = contentRepository.findByAuthorId(userId)
+            val contents = contentRepository.findByAuthorId(userId, pageable)
             return contents.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
         }
 
-        val pageable = PageRequest.of(page, size)
         val recommended = contentRepository.findRecommendedByUserLikes(userId, pageable)
         return recommended.content.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
     }

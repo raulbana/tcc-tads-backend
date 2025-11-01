@@ -54,9 +54,10 @@ class ContentController(private val service: ContentService) {
     fun getContents(
         @RequestHeader(value = "x-user-id") userId: Long,
         @RequestHeader(value = "x-profile", required = false) profile: Boolean?,
-        @RequestHeader(value = "page", required = false) page: Int?
+        @RequestHeader(value = "page", required = false) page: Int?,
+        @RequestHeader(value = "size", required = false) size: Int?
     ): ResponseEntity<List<ContentSimpleDTO>> {
-        return ResponseEntity.ok(service.getContents(userId, profile ?: false, page ?: 0))
+        return ResponseEntity.ok(service.getContents(userId, profile ?: false, page, size))
     }
 
     @GetMapping("/{id}")
