@@ -5,6 +5,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto.WorkoutDTO
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.ExerciseCategoryRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.ExerciseRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.exercise.WorkoutRepository
+import br.ufpr.tads.daily_iu_services.domain.entity.content.Category
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.Exercise
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseCategory
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.Workout
@@ -47,6 +48,9 @@ class WorkoutControllerTest {
     @Autowired
     private lateinit var categoryRepository: ExerciseCategoryRepository
 
+    private lateinit var savedExercise: Exercise
+    private lateinit var savedCategory: ExerciseCategory
+
     @BeforeAll
     fun setup() {
         val exCat1 = ExerciseCategory(
@@ -54,9 +58,11 @@ class WorkoutControllerTest {
             description = "Exercícios focados na contração e relaxamento do assoalho pélvico, fundamentais para o fortalecimento muscular e controle urinário. Podem ser feitos em qualquer posição e adaptados para diferentes níveis de habilidade."
         )
 
+        savedCategory = categoryRepository.save(exCat1)
+
         val exercise = Exercise(
             title = "Exercício de Kegel Básico",
-            category = categoryRepository.save(exCat1),
+            category = savedCategory,
             instructions = "Contraia os músculos do assoalho pélvico, segure por 5 segundos e relaxe por 5 segundos. Repita 10 vezes.",
             repetitions = 10,
             sets = 1,
@@ -64,7 +70,7 @@ class WorkoutControllerTest {
             duration = 100
         )
 
-        val savedExercise = exerciseRepository.save(exercise)
+        savedExercise = exerciseRepository.save(exercise)
 
         val workout = Workout(
             name = "Treino de Kegel para Iniciantes",
@@ -110,7 +116,7 @@ class WorkoutControllerTest {
             description = "Um treino avançado focado no fortalecimento do assoalho pélvico através de exercícios de Kegel.",
             totalDuration = 200,
             difficultyLevel = "Avançado",
-            exerciseIds = mapOf(1 to 1L)
+            exerciseIds = mapOf(1 to savedExercise.id!!)
         )
 
         val request = MockMvcRequestBuilders
@@ -133,7 +139,7 @@ class WorkoutControllerTest {
     fun `Deve atualizar um treino existente`() {
         val exNew = Exercise(
             title = "Exercício de Kegel Intermediário",
-            category = categoryRepository.findById(1L).get(),
+            category = categoryRepository.findById(savedCategory.id!!).get(),
             instructions = "Contraia os músculos do assoalho pélvico, segure por 10 segundos e relaxe por 10 segundos. Repita 15 vezes.",
             repetitions = 15,
             sets = 1,
@@ -147,7 +153,7 @@ class WorkoutControllerTest {
             description = "Um treino simples focado no fortalecimento do assoalho pélvico através de exercícios de Kegel. Versão atualizada.",
             totalDuration = 120,
             difficultyLevel = "Iniciante",
-            exerciseIds = mapOf(1 to 1L, 2 to savedEx.id!!)
+            exerciseIds = mapOf(1 to savedExercise.id!!, 2 to savedEx.id!!)
         )
 
         val request = MockMvcRequestBuilders

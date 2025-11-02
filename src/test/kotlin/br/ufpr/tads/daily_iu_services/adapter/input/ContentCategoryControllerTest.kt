@@ -10,8 +10,11 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -85,12 +88,12 @@ class ContentCategoryControllerTest {
 
     @Test
     fun `Deve listar todas as categorias de conteudo`() {
-        val requestBuilder = org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+        val requestBuilder = MockMvcRequestBuilders
             .get("/v1/content/category")
-            .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
 
         val response = mvc.perform(requestBuilder)
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.status().isOk)
             .andReturn().response.contentAsString
 
         val categories: List<Category> = mapper.readValue(response, Array<Category>::class.java).toList()
@@ -108,14 +111,14 @@ class ContentCategoryControllerTest {
 
         val requestBody = mapper.writeValueAsString(newCategory)
 
-        val requestBuilder = org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+        val requestBuilder = MockMvcRequestBuilders
             .post("/v1/content/category")
-            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody)
-            .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
 
         val response = mvc.perform(requestBuilder)
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isCreated)
+            .andExpect(MockMvcResultMatchers.status().isCreated)
             .andReturn().response.contentAsString
 
         val createdCategory: Category = mapper.readValue(response, Category::class.java)
@@ -128,19 +131,20 @@ class ContentCategoryControllerTest {
         val existingCategory = repository.findAll().first()
         val updatedCategory = existingCategory.copy(
             name = "Nome Atualizado",
-            description = "Descrição atualizada da categoria."
+            description = "Descrição atualizada da categoria.",
+            createdAt = null
         )
 
         val requestBody = mapper.writeValueAsString(updatedCategory)
 
-        val requestBuilder = org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+        val requestBuilder = MockMvcRequestBuilders
             .put("/v1/content/category/${existingCategory.id}")
-            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody)
-            .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
 
         val response = mvc.perform(requestBuilder)
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.status().isOk)
             .andReturn().response.contentAsString
 
         val returnedCategory: Category = mapper.readValue(response, Category::class.java)
@@ -160,12 +164,12 @@ class ContentCategoryControllerTest {
 
         val existingCategory = repository.findAll().last()
 
-        val requestBuilder = org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+        val requestBuilder = MockMvcRequestBuilders
             .delete("/v1/content/category/${existingCategory.id}")
-            .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
 
         mvc.perform(requestBuilder)
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isNoContent)
+            .andExpect(MockMvcResultMatchers.status().isNoContent)
 
         val deletedCategory = repository.findById(existingCategory.id!!)
         Assertions.assertTrue(deletedCategory.isEmpty, "A categoria deveria ser deletada do repositório")
