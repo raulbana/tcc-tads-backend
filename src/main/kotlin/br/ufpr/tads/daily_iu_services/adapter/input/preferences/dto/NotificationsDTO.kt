@@ -6,12 +6,15 @@ import java.time.LocalTime
 data class NotificationsDTO(
     @field:NotNull
     val reminderCalendar: Boolean,
-    val reminderCalendarSchedule: LocalTime,
+    val reminderCalendarSchedule: LocalTime?,
 
     @field:NotNull
     val reminderWorkout: Boolean,
-    val reminderWorkoutSchedule: LocalTime,
+    val reminderWorkoutSchedule: LocalTime?,
 
     @field:NotNull
-    val encouragingMessages: Boolean
+    val encouragingMessages: Boolean,
+
+    @field:NotNull
+    val notificationToken: String
 )

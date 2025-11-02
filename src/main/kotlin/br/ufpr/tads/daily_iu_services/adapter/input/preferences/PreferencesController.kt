@@ -5,7 +5,6 @@ import br.ufpr.tads.daily_iu_services.adapter.input.preferences.dto.Notification
 import br.ufpr.tads.daily_iu_services.domain.service.PreferencesService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.constraints.Min
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -38,15 +37,16 @@ class PreferencesController(private val service: PreferencesService) {
     @GetMapping("/notifications")
     @Operation(summary = "Obter Preferências de Notificação", description = "Recupera as preferências de notificação de um usuário")
     fun getNotificationPreferences(@RequestHeader("x-user-id") userId: Long): ResponseEntity<NotificationsDTO> {
-        TODO("Not implemented yet")
+        return ResponseEntity.ok(service.getNotificationPreferences(userId))
     }
 
     @PatchMapping("/notifications")
     @Operation(summary = "Definir Preferências de Notificação", description = "Atualiza as preferências de notificação de um usuário")
     fun setNotificationPreferences(
         @RequestHeader("x-user-id") userId: Long,
-        @RequestBody() preferences: NotificationsDTO
+        @RequestBody preferences: NotificationsDTO
     ): ResponseEntity<Void> {
-        TODO("Not implemented yet")
+        service.setNotificationPreferences(userId, preferences)
+        return ResponseEntity.noContent().build()
     }
 }
