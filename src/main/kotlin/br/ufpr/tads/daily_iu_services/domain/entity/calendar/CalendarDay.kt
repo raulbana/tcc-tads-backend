@@ -17,6 +17,14 @@ class CalendarDay(
     @Enumerated(EnumType.STRING)
     var leakageLevel: LeakageLevel,
 
+    @OneToMany(
+        mappedBy = "calendarDay",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    val urinationData: MutableList<UrinationData> = mutableListOf(),
+
     var eventsCount: Int,
     var completedExercises: Int,
     var notesPreview: String?,

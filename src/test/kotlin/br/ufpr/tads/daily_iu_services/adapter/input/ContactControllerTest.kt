@@ -45,7 +45,7 @@ class ContactControllerTest {
 
     @Test
     fun `Deve enviar email de contato`() {
-        mvc.perform(MockMvcRequestBuilders.post("/v1/contact")
+        mvc.perform(MockMvcRequestBuilders.post("/v1/contact/support")
             .content("{\"userEmail\": \"leosalgado2004@gmail.com\", \"subject\": \"Email Teste\", \"text\": \"Conteudo do email\"}")
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.status().isNoContent)

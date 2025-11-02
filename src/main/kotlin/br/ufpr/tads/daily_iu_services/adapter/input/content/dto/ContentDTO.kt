@@ -1,6 +1,7 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
 
 import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaDTO
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDateTime
 
@@ -11,7 +12,7 @@ data class ContentDTO(
     val description: String,
     val subtitle: String?,
     val subcontent: String?,
-    val category: String,
+    val categories: List<String>,
     val author: AuthorDTO,
     val cover: MediaDTO?,
     val media: List<MediaDTO>,
@@ -22,6 +23,8 @@ data class ContentDTO(
     val isReposted: Boolean,
     val repostedFromContentId: Long?,
     val repostedByUser: AuthorDTO?,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val createdAt: LocalDateTime,
+    @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val updatedAt: LocalDateTime
 )

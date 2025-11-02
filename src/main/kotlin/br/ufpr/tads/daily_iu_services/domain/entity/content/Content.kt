@@ -24,9 +24,8 @@ data class Content(
     var subtitle: String?,
     var subcontent: String?,
 
-    @OneToOne
-    @JoinColumn(name = "categoryId", referencedColumnName = "id")
-    var category: Category,
+    @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val categories: MutableList<ContentContentCategory> = mutableListOf(),
 
     @ManyToOne
     @JoinColumn(name = "authorId", referencedColumnName = "id")
@@ -47,6 +46,9 @@ data class Content(
 
     @OneToMany(mappedBy = "content", cascade = [CascadeType.ALL], orphanRemoval = true)
     val media: MutableList<ContentMedia> = mutableListOf(),
+
+    var visible: Boolean = true,
+    var striked: Boolean = false,
 
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime = LocalDateTime.now()

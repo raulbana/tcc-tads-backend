@@ -16,7 +16,7 @@ data class ContentCreatorDTO(
     val subcontent: String?,
 
     @field:NotNull("O ID da categoria não pode ser nulo")
-    val categoryId: Long,
+    val categoryIds: List<Long>,
 
     @field:NotNull("O ID do autor não pode ser nulo")
     val authorId: Long,

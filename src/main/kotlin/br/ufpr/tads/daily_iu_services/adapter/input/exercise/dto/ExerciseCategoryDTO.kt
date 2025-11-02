@@ -1,11 +1,11 @@
-package br.ufpr.tads.daily_iu_services.adapter.input.content.dto
+package br.ufpr.tads.daily_iu_services.adapter.input.exercise.dto
 
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
 
-data class CategoryDTO (
+data class ExerciseCategoryDTO(
     val id: Long? = null,
 
     @field:NotNull
@@ -13,10 +13,5 @@ data class CategoryDTO (
 
     @field:NotEmpty
     @field:Size(max = 255, message = "A descrição não deve exceder 255 caracteres")
-    var description: String,
-
-    @field:NotNull
-    var auditable: Boolean,
-
-    val createdAt: LocalDateTime?
+    var description: String? = null
 )

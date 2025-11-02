@@ -12,6 +12,9 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     database-platform: org.hibernate.dialect.H2Dialect
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   sql:
     init:
       mode: embedded

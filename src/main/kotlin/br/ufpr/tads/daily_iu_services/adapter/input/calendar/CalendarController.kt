@@ -20,11 +20,11 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/v1/calendar")
-@Tag(name = "Calendar", description = "Endpoints for managing calendar events")
+@Tag(name = "Diário", description = "Endpoints relacionados ao diário miccional do usuário")
 class CalendarController(private val calendarService: CalendarService) {
 
     @GetMapping
-    @Operation(summary = "Get calendar events", description = "Retrieve calendar events for a user within an optional date range")
+    @Operation(summary = "Listar eventos do calendário", description = "Retorna os eventos do calendário do usuário em um intervalo de datas. Se as datas não forem fornecidas, retorna eventos do mês atual.")
     fun getCalendarEvents(
         @RequestParam(required = false) @ValidDate(required = false) from: LocalDate?,
         @RequestParam(required = false) @ValidDate(required = false) to: LocalDate?,
@@ -34,7 +34,7 @@ class CalendarController(private val calendarService: CalendarService) {
     }
 
     @PutMapping
-    @Operation(summary = "Set calendar event", description = "Create or update a calendar event for a user")
+    @Operation(summary = "Adicionar ou atualizar evento no calendário", description = "Adiciona ou atualiza um evento no calendário do usuário para uma data específica.")
     fun setCalendarEvent(
         @RequestBody @Valid request: CalendarRequestDTO,
         @RequestHeader(value = "user-id") userId: Long

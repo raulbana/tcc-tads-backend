@@ -1,9 +1,8 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper
 
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.AuthorDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.CategoryDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentCategoryDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.CommentDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentCreatorDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentSimpleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaDTO
@@ -11,6 +10,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.content.Category
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Comment
 import br.ufpr.tads.daily_iu_services.domain.entity.content.CommentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.Content
+import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentContentCategory
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentLikes
 import br.ufpr.tads.daily_iu_services.domain.entity.content.ContentMedia
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
@@ -19,7 +19,6 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
-import java.time.LocalDateTime
 
 @Mapper
 abstract class ContentMapper {
@@ -30,7 +29,7 @@ abstract class ContentMapper {
 
     @Mapping(target = "author", source = "author", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "cover", source = "media", qualifiedByName = ["getCoverMedia"])
-    @Mapping(target = "category", source = "category", qualifiedByName = ["categoryToString"])
+    @Mapping(target = "categories", source = "categories", qualifiedByName = ["categoriesToString"])
     @Mapping(target= "isReposted", source = "repost")
     abstract fun contentToSimpleDTO(entity: Content): ContentSimpleDTO
 
@@ -39,7 +38,7 @@ abstract class ContentMapper {
     @Mapping(target = "description", source = "content.description")
     @Mapping(target = "subtitle", source = "content.subtitle")
     @Mapping(target = "subcontent", source = "content.subcontent")
-    @Mapping(target = "category", source = "content.category", qualifiedByName = ["categoryToString"])
+    @Mapping(target = "categories", source = "content.categories", qualifiedByName = ["categoriesToString"])
     @Mapping(target = "author", source = "content.author", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "cover", source = "content.media", qualifiedByName = ["getCoverMedia"])
     @Mapping(target = "media", source = "content.media", qualifiedByName = ["mediasToDTO"])
@@ -54,15 +53,18 @@ abstract class ContentMapper {
     @Mapping(target = "updatedAt", source = "content.updatedAt")
     abstract fun contentToDTO(content: Content, userId: Long): ContentDTO
 
+    @Named("mediaToUrl")
+    fun mediaToUrl(media: Media?) = media?.url
+
     @Named("userToAuthorDTO")
-    @Mapping(target = "profilePicture", source = "profilePictureUrl")
+    @Mapping(target = "profilePicture", source = "profilePicture", qualifiedByName = ["mediaToUrl"])
     abstract fun userToAuthorDTO(user: User): AuthorDTO
 
     @Named("getCoverMedia")
     fun getCoverMedia(mediaList: List<ContentMedia>) = mediaList.map { mediaToDTO(it) }.firstOrNull()
 
-    @Named("categoryToString")
-    fun categoryToString(category: Category) = category.name
+    @Named("categoriesToString")
+    fun categoriesToString(categories: List<ContentContentCategory>) = categories.map { it.category.name }
 
     @Named("countSize")
     fun countSize(list: List<Any>) = list.size
@@ -79,6 +81,7 @@ abstract class ContentMapper {
     @Named("getCommentLikeStatus")
     fun getCommentLikeStatus(likes: List<CommentLikes>, userId: Long) = likes.any { it.userId == userId}
 
+    @Mapping(target = "id", source = "media.id")
     @Mapping(target = "url", source = "media.url")
     @Mapping(target = "contentType", source = "media.contentType")
     @Mapping(target = "contentSize", source = "media.contentSize")
@@ -87,7 +90,6 @@ abstract class ContentMapper {
     abstract fun mediaToDTO(entity: ContentMedia): MediaDTO
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "id", ignore = true)
     abstract fun mediaDTOToEntity(dto: MediaDTO): Media
 
     @Mapping(target = "id", source = "comment.id")
@@ -100,7 +102,7 @@ abstract class ContentMapper {
     @Mapping(target = "repliesCount", source = "comment.replies", qualifiedByName = ["countSize"])
     abstract fun commentToDTO(comment: Comment, userId: Long): CommentDTO
 
-    abstract fun categoryToDTO(entity: Category): CategoryDTO
+    abstract fun categoryToDTO(entity: Category): ContentCategoryDTO
 
-    abstract fun categoryDTOToEntity(dto: CategoryDTO): Category
+    abstract fun categoryDTOToEntity(dto: ContentCategoryDTO): Category
 }

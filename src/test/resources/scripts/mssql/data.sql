@@ -11,11 +11,11 @@ INSERT INTO question (externalId, text, type, required) VALUES
     'RADIO', 1);
 
 INSERT INTO question (externalId, text, type, required) VALUES
-('q3_frequency', 'Com que frequência você urina?',
+('q3_frequency', 'Com que frequência você perde urina?',
     'RADIO', 1);
 
 INSERT INTO question (externalId, text, type, required) VALUES
-('q4_amount', 'Como você quantifica sua perda de urina?',
+('q4_amount', 'Gostaríamos de saber a quantidade de urina que você pensa que perde (Assinale a alternativa que melhor representa a sua percepção)',
     'RADIO', 1);
 
 INSERT INTO question (externalId, text, type, required, minValue, maxValue, step) VALUES
@@ -55,11 +55,12 @@ GO
 INSERT INTO questionOption (questionId, label, textValue) VALUES
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Nunca', '0'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Antes de chegar ao banheiro', '1'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco antes de terminar de urinar e/ou após urinar', '2'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando tusso ou espirro', '2'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando estou dormindo', '3'),
 ((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando estou realizando atividades físicas', '4'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando terminei de urinar e estou vestindo', '5'),
-((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco o tempo todo', '6');
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco quando terminei de urinar e estou me vestindo', '5'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco sem razão aparente', '6'),
+((SELECT id FROM question WHERE externalId = 'q6_when'), 'Perco o tempo todo', '7');
 GO
 
 --//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
@@ -71,19 +72,24 @@ INSERT INTO credential (passwordHash, salt) VALUES
 GO
 
 
-INSERT INTO patientProfile (birthDate, gender) VALUES
-('1980-05-15', 'M'),
-('1990-10-20', 'F');
+INSERT INTO patientProfile (birthDate, gender, iciq3answer, iciq4answer, iciq5answer, iciqScore, urinationLoss) VALUES
+('1980-05-15', 'M', 0, 0, 3, 3, '1,2,3'),
+('1990-10-20', 'F', 2, 2, 6, 10, '2,3,4,5');
 GO
 
-INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalendarSchedule, reminderWorkout, reminderWorkoutSchedule, encouragingMessages, workoutMediaType) VALUES
-(0, 0, 1, '09:00', 1, '18:00', 1, 'VIDEO'),
-(1, 1, 0, NULL, 0, NULL, 1, 'IMAGE');
+INSERT INTO preferences (highContrast, bigFont, reminderCalendar, reminderCalendarSchedule, reminderWorkout, reminderWorkoutSchedule, encouragingMessages) VALUES
+(0, 0, 1, '09:00', 1, '18:00', 1),
+(1, 1, 0, NULL, 0, NULL, 1);
+
+INSERT INTO role(description, permissionLevel, reason, hasDocument) VALUES
+('Usuário comum', 1, 'Acesso padrão ao aplicativo.', 0),
+('Usuário comum', 1, 'Acesso padrão ao aplicativo.', 0),
+('Administrador', 3, 'Acesso total ao sistema para gerenciamento e manutenção.', 0);
 
 -- Inserindo usuários
-INSERT INTO appUser (name, email, credentialId, patientProfileId, preferencesId) VALUES
-('Usuário 1', 'usuario1@example.com', 1, 1, 1),
-('Usuária 2', 'usuario2@example.com', 2, 2, 2);
+INSERT INTO appUser (name, email, credentialId, patientProfileId, preferencesId, roleId) VALUES
+('Usuário 1', 'usuario1@example.com', 1, 1, 1, 1),
+('Usuária 2', 'usuario2@example.com', 2, 2, 2, 2);
 GO
 
 -- Inserindo dados do calendário
@@ -137,13 +143,22 @@ INSERT INTO contentCategory (name, description, auditable) VALUES
 ('Profissionais Respondem', 'Sessão para perguntas e respostas com especialistas (fisioterapeutas, nutricionistas, médicos).', 1);
 GO
 
-INSERT INTO content (title, description, subtitle, subContent, categoryId, authorId, repost) VALUES
-('Receita funcional para o café da manhã', 'Comece o dia com uma panqueca de banana e aveia batida com um fio de mel e canela, assada em frigideira antiaderente. Rica em fibras solúveis, ajuda a regular o intestino e reduzir o esforço que pressiona a bexiga. Evite adoçar em excesso e prefira leite vegetal se houver sensibilidade. Combine com uma porção de iogurte natural para proteína.', 'Benefícios para o trato urinário', 'A fibra solúvel da aveia auxilia no trânsito intestinal, diminuindo constipação e a pressão abdominal que pode agravar episódios de escape.', 1, 1, 0),
-('Exercício respiratório para relaxar o assoalho pélvico', 'A prática da respiração diafragmática reduz a tensão involuntária dos músculos do assoalho pélvico e melhora o controle neuromuscular. Deite-se com as mãos sobre o abdome, inspire contando até quatro e sinta o diafragma descendo; expire lentamente contando até seis, permitindo que o períneo relaxe. Repita por 5 a 10 minutos, duas vezes ao dia, especialmente após atividades que geram esforço. Integre esses exercícios a uma rotina de alongamento suave.', 'Ponto de atenção', 'Se houver dor ou aumento dos sintomas, interrompa e consulte um fisioterapeuta especializado.', 3, 1, 0),
-('Minha jornada pós-parto com incontinência', 'Após o segundo parto experimentei escapes ao espirrar e ao correr; inicialmente ignorei por vergonha, até perceber que afetava minha rotina social. Procurei atendimento fisioterapêutico, aprendi a identificar e contrair corretamente o assoalho pélvico e passei a fortalecer o core com exercícios graduais. Em três meses notei redução dos episódios e mais confiança para voltar a atividades físicas. A troca de experiências com outras mães foi fundamental para manter a motivação.', null, null, 4, 2, 0),
-('Mito: só quem teve filhos sofre com incontinência', 'A incontinência urinária não é exclusiva de quem já teve filhos; ela pode surgir por diversos motivos em diferentes faixas etárias. Problemas neurológicos, obesidade, cirurgia pélvica, alterações hormonais e predisposição genética são fatores que aumentam o risco. Identificar o tipo de incontinência é essencial para direcionar o tratamento adequado e eficaz. Informação correta evita estigmas e promove busca precoce por ajuda.', 'Fatores de risco', 'Sedentarismo, excesso de peso, tabagismo e constipação crônica aumentam a probabilidade de desenvolver sintomas.', 5, 1, 0),
-('Desafio: 10 minutos de autocuidado por dia', 'Reserve 10 minutos diários para práticas simples: alongamento leve, respiração guiada, hidratação consciente e registro rápido de humor. Pequenos hábitos acumulam efeito na redução do estresse, melhoram o sono e ajudam no controle muscular do períneo ao longo do tempo. Documente os progressos na comunidade para manter a responsabilidade e inspirar outras pessoas. Experimente variar a atividade a cada dia para manter o engajamento.', null, null, 2, 2, 0),
-('Posso fazer pilates com incontinência?', 'Sim, pilates pode ser uma ferramenta eficaz quando adaptado às necessidades de quem tem incontinência; o foco é na ativação controlada do core e no equilíbrio da pressão intra-abdominal. Instrutores com formação em saúde da mulher devem priorizar exercícios com respiração coordenada e evitar movimentos que gerem esforço abrupto sem suporte muscular. Comece com sessões individuais ou em pequenos grupos até ganhar controle e segurança. Monitore sintomas e ajuste progressão conforme orientação profissional.', 'Dicas para praticar com segurança', 'Procure profissionais que realizem avaliação inicial do assoalho pélvico e ofereçam progressão personalizada.', 6, 1, 0);
+INSERT INTO content (title, description, subtitle, subContent, authorId, repost) VALUES
+('Receita funcional para o café da manhã', 'Comece o dia com uma panqueca de banana e aveia batida com um fio de mel e canela, assada em frigideira antiaderente. Rica em fibras solúveis, ajuda a regular o intestino e reduzir o esforço que pressiona a bexiga. Evite adoçar em excesso e prefira leite vegetal se houver sensibilidade. Combine com uma porção de iogurte natural para proteína.', 'Benefícios para o trato urinário', 'A fibra solúvel da aveia auxilia no trânsito intestinal, diminuindo constipação e a pressão abdominal que pode agravar episódios de escape.', 1, 0),
+('Exercício respiratório para relaxar o assoalho pélvico', 'A prática da respiração diafragmática reduz a tensão involuntária dos músculos do assoalho pélvico e melhora o controle neuromuscular. Deite-se com as mãos sobre o abdome, inspire contando até quatro e sinta o diafragma descendo; expire lentamente contando até seis, permitindo que o períneo relaxe. Repita por 5 a 10 minutos, duas vezes ao dia, especialmente após atividades que geram esforço. Integre esses exercícios a uma rotina de alongamento suave.', 'Ponto de atenção', 'Se houver dor ou aumento dos sintomas, interrompa e consulte um fisioterapeuta especializado.', 1, 0),
+('Minha jornada pós-parto com incontinência', 'Após o segundo parto experimentei escapes ao espirrar e ao correr; inicialmente ignorei por vergonha, até perceber que afetava minha rotina social. Procurei atendimento fisioterapêutico, aprendi a identificar e contrair corretamente o assoalho pélvico e passei a fortalecer o core com exercícios graduais. Em três meses notei redução dos episódios e mais confiança para voltar a atividades físicas. A troca de experiências com outras mães foi fundamental para manter a motivação.', null, null, 2, 0),
+('Mito: só quem teve filhos sofre com incontinência', 'A incontinência urinária não é exclusiva de quem já teve filhos; ela pode surgir por diversos motivos em diferentes faixas etárias. Problemas neurológicos, obesidade, cirurgia pélvica, alterações hormonais e predisposição genética são fatores que aumentam o risco. Identificar o tipo de incontinência é essencial para direcionar o tratamento adequado e eficaz. Informação correta evita estigmas e promove busca precoce por ajuda.', 'Fatores de risco', 'Sedentarismo, excesso de peso, tabagismo e constipação crônica aumentam a probabilidade de desenvolver sintomas.', 1, 0),
+('Desafio: 10 minutos de autocuidado por dia', 'Reserve 10 minutos diários para práticas simples: alongamento leve, respiração guiada, hidratação consciente e registro rápido de humor. Pequenos hábitos acumulam efeito na redução do estresse, melhoram o sono e ajudam no controle muscular do períneo ao longo do tempo. Documente os progressos na comunidade para manter a responsabilidade e inspirar outras pessoas. Experimente variar a atividade a cada dia para manter o engajamento.', null, null, 2, 0),
+('Posso fazer pilates com incontinência?', 'Sim, pilates pode ser uma ferramenta eficaz quando adaptado às necessidades de quem tem incontinência; o foco é na ativação controlada do core e no equilíbrio da pressão intra-abdominal. Instrutores com formação em saúde da mulher devem priorizar exercícios com respiração coordenada e evitar movimentos que gerem esforço abrupto sem suporte muscular. Comece com sessões individuais ou em pequenos grupos até ganhar controle e segurança. Monitore sintomas e ajuste progressão conforme orientação profissional.', 'Dicas para praticar com segurança', 'Procure profissionais que realizem avaliação inicial do assoalho pélvico e ofereçam progressão personalizada.', 1, 0);
+GO
+
+INSERT INTO contentContentCategory(contentId, categoryId) VALUES
+(1, 1),
+(2, 3),
+(3, 4),
+(4, 5),
+(5, 2),
+(6, 6);
 GO
 
 INSERT INTO media (url, contentType, contentSize, altText) VALUES
@@ -182,4 +197,65 @@ INSERT INTO contentLikes (contentId, userId) VALUES
 (6, 1),
 (1, 1),
 (2, 2);
+GO
+
+--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--
+-- Inserindo dados de exercícios físicos
+
+INSERT INTO exerciseCategory (name, description) VALUES
+('Kegel', 'Exercícios focados na contração e relaxamento do assoalho pélvico, fundamentais para o fortalecimento muscular e controle urinário. Podem ser feitos em qualquer posição e adaptados para diferentes níveis de habilidade.'),
+('Alongamento', 'Movimentos suaves que promovem flexibilidade, aliviam tensões na região lombar e pélvica, e melhoram a postura. Podem ser usados como preparação ou complemento aos exercícios de força.'),
+('Mobilidade Pélvica', 'Sequências que estimulam o movimento consciente da pelve, melhorando a coordenação, a circulação local e a percepção corporal. Indicados para quem sente rigidez ou desconforto na região.'),
+('Respiração e Relaxamento', 'Técnicas respiratórias que ativam o diafragma e promovem relaxamento do assoalho pélvico. Essenciais para reduzir tensão muscular, melhorar o controle abdominal e favorecer a recuperação pós-parto.');
+GO
+
+INSERT INTO exerciseAttribute (name, type, description) VALUES
+('Fortalecimento do Assoalho Pélvico', 'BENEFIT', 'Melhora a força e resistência dos músculos do assoalho pélvico, reduzindo episódios de incontinência.'),
+('Aumento da Flexibilidade', 'BENEFIT', 'Promove maior amplitude de movimento na região pélvica e lombar, aliviando tensões musculares.'),
+('Melhora da Postura', 'BENEFIT', 'Contribui para o alinhamento corporal adequado, reduzindo sobrecarga na região pélvica.'),
+('Redução do Estresse', 'BENEFIT', 'Técnicas de respiração e relaxamento que ajudam a diminuir a tensão muscular e o estresse geral.');
+GO
+
+INSERT INTO exercise (title, categoryId, instructions, repetitions, sets, restTime, duration) VALUES
+('Exercícios de Kegel Básicos', 1, 'Deitada de costas ou sentada, contraia o períneo por 5 segundos e relaxe.', 10, 3, 10, 80),
+('Exercícios de Ponte', 1, 'Deitada de costas, contraia o bumbum, elevando-o da cama ou do chão enquanto inspira (puxa o ar)', 10, 3, 15, 90),
+('Alongamento do Gato-Vaca', 2, 'Em posição de quatro apoios, alterne entre arquear e arredondar as costas.', 10, 2, 10, 60),
+('Mobilização Pélvica em Círculos', 3, 'Sentada, faça movimentos circulares com a pelve, alternando sentido horário e anti-horário.', 10, 2, 10, 60),
+('Respiração Diafragmática', 4, 'Deitada ou sentada, inspire profundamente pelo nariz, expandindo o abdome, e expire lentamente pela boca.', 5, 3, 15, 75);
+GO
+
+INSERT INTO exerciseExerciseAttribute (exerciseId, attributeId) VALUES
+((SELECT id FROM exercise WHERE title = 'Exercícios de Kegel Básicos'), (SELECT id FROM exerciseAttribute WHERE name = 'Fortalecimento do Assoalho Pélvico')),
+((SELECT id FROM exercise WHERE title = 'Exercícios de Ponte'), (SELECT id FROM exerciseAttribute WHERE name = 'Fortalecimento do Assoalho Pélvico')),
+((SELECT id FROM exercise WHERE title = 'Alongamento do Gato-Vaca'), (SELECT id FROM exerciseAttribute WHERE name = 'Aumento da Flexibilidade')),
+((SELECT id FROM exercise WHERE title = 'Mobilização Pélvica em Círculos'), (SELECT id FROM exerciseAttribute WHERE name = 'Aumento da Flexibilidade')),
+((SELECT id FROM exercise WHERE title = 'Respiração Diafragmática'), (SELECT id FROM exerciseAttribute WHERE name = 'Redução do Estresse'));
+GO
+
+INSERT INTO workout (name, description, totalDuration, difficultyLevel) VALUES
+('Rotina Matinal para Fortalecimento', 'Sequência de exercícios para iniciar o dia com foco no fortalecimento do assoalho pélvico e mobilidade pélvica.', 300, 'BEGINNER'),
+('Alongamento e Relaxamento Noturno', 'Série de alongamentos e técnicas de respiração para relaxar antes de dormir, aliviando tensões acumuladas.', 240, 'BEGINNER');
+GO
+
+INSERT INTO workoutExercise (workoutId, exerciseId, exerciseOrder) VALUES
+((SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), (SELECT id FROM exercise WHERE title = 'Exercícios de Kegel Básicos'), 1),
+((SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), (SELECT id FROM exercise WHERE title = 'Mobilização Pélvica em Círculos'), 2),
+((SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), (SELECT id FROM exercise WHERE title = 'Alongamento do Gato-Vaca'), 1),
+((SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), (SELECT id FROM exercise WHERE title = 'Respiração Diafragmática'), 2);
+GO
+
+INSERT INTO workoutPlan (name, description, daysPerWeek, totalWeeks, iciqScoreMin, iciqScoreMax, ageMin, ageMax) VALUES
+('Plano de 4 Semanas para Iniciantes', 'Programa gradual para fortalecer o assoalho pélvico e melhorar o controle urinário ao longo de um mês.', 3, 4, 2, 7, 18, 65),
+('Plano de Manutenção Semanal', 'Rotina semanal para manter os ganhos de força e flexibilidade do assoalho pélvico.', 2, 8, 6, 15, 18, 65);
+GO
+
+INSERT INTO workoutPlanWorkout (workoutPlanId, workoutId, workoutOrder) VALUES
+((SELECT id FROM workoutPlan WHERE name = 'Plano de 4 Semanas para Iniciantes'), (SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), 1),
+((SELECT id FROM workoutPlan WHERE name = 'Plano de 4 Semanas para Iniciantes'), (SELECT id FROM workout WHERE name = 'Alongamento e Relaxamento Noturno'), 2),
+((SELECT id FROM workoutPlan WHERE name = 'Plano de Manutenção Semanal'), (SELECT id FROM workout WHERE name = 'Rotina Matinal para Fortalecimento'), 1);
+GO
+
+INSERT INTO userWorkoutPlan (userId, workoutPlanId, startDate, endDate, totalProgress, weekProgress, currentWeek, nextWorkout, completed) VALUES
+(1, (SELECT id FROM workoutPlan WHERE name = 'Plano de 4 Semanas para Iniciantes'), '2025-06-01', '2025-06-28', 12, 3, 4, null, 1),
+(2, (SELECT id FROM workoutPlan WHERE name = 'Plano de Manutenção Semanal'), '2025-07-01', NULL, 0, 0, 1, 1, 0);
 GO

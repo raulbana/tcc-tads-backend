@@ -1,5 +1,6 @@
 package br.ufpr.tads.daily_iu_services.domain.entity.user
 
+import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
 import jakarta.persistence.*
 
 @Entity
@@ -10,11 +11,14 @@ class User (
     val id: Long? = null,
     var name: String,
     var email: String,
-    var profilePictureUrl: String?,
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "profilePictureId", referencedColumnName = "id")
+    var profilePicture: Media?,
+
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "patientProfileId", referencedColumnName = "id")
-    val profile: PatientProfile,
+    val profile: PatientProfile?,
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "credentialId", referencedColumnName = "id")
@@ -22,5 +26,12 @@ class User (
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "preferencesId", referencedColumnName = "id")
-    val preferences: Preferences
+    val preferences: Preferences,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "roleId", referencedColumnName = "id")
+    var role: Role,
+
+    var strikes: Int = 0,
+    var blocked: Boolean = false
 )

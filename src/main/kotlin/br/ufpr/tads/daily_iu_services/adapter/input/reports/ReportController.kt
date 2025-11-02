@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v1/report")
-@Tag(name = "Report", description = "Endpoints for generating user reports")
+@Tag(name = "Relatório", description = "Endpoints para geração de relatórios de usuários")
 class ReportController(val service: ReportService) {
 
     @GetMapping
-    @Operation(summary = "Generate user report", description = "Generates a report based on user activities within a specified date range.")
+    @Operation(summary = "Gerar relatório de usuário", description = "Gera um relatório com base nas atividades do usuário dentro de um intervalo de datas especificado.")
     fun getReport(
         @RequestHeader("x-user-id") @Min(1) userId: Long,
         @Valid @ModelAttribute params: ReportParamDTO
