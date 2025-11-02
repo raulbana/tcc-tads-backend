@@ -60,9 +60,9 @@ class CommentService(
             // Retorna o reply salvo
             savedReply
         } else {
-            val content = contentRepository.findById(request.contentId).orElseThrow {
+            val content = contentRepository.findByIdAndStrikedFalse(request.contentId) ?:
                 throw NotFoundException("Conteúdo com id ${request.contentId} não encontrado")
-            }
+
             val author = userRepository.findById(request.authorId).orElseThrow {
                 throw NotFoundException("Usuário com id ${request.authorId} não encontrado")
             }

@@ -304,6 +304,7 @@ CREATE TABLE content (
     repostFromcontentId BIGINT DEFAULT NULL,
     repostByAuthorId BIGINT DEFAULT NULL,
     visible BIT NOT NULL DEFAULT 1,
+    striked BIT NOT NULL DEFAULT 0,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (authorId) REFERENCES appUser(id),
@@ -426,8 +427,7 @@ BEGIN
         FROM content c
         JOIN score_by_content sbc ON sbc.contentId = c.id
         LEFT JOIN liked_authors la ON la.authorId = c.authorId
-        WHERE c.visible = 1
-          AND NOT EXISTS (SELECT 1 FROM contentLikes cl2 WHERE cl2.contentId = c.id AND cl2.userId = @UserId)
+        WHERE c.visible = 1 AND c.striked = 0
     )
     -- Insere o resultado em uma tabela temporária para poder reutilizar em múltiplas instruções
     SELECT contentId, common_count, score
@@ -453,13 +453,13 @@ BEGIN
         -- retorna conteúdos visíveis recentes que o usuário ainda não curtiu.
         SELECT @TotalCount = COUNT(*)
         FROM content c
-        WHERE c.visible = 1
+        WHERE c.visible = 1 AND c.striked = 0
           AND NOT EXISTS (SELECT 1 FROM contentLikes cl2 WHERE cl2.contentId = c.id AND cl2.userId = @UserId);
 
         SELECT c.id, c.title, c.description, c.subtitle, c.subContent, c.authorId, c.repost,
                c.repostFromcontentId, c.repostByAuthorId, c.visible, c.createdAt, c.updatedAt
         FROM content c
-        WHERE c.visible = 1
+        WHERE c.visible = 1 AND c.striked = 0
           AND NOT EXISTS (SELECT 1 FROM contentLikes cl2 WHERE cl2.contentId = c.id AND cl2.userId = @UserId)
         ORDER BY c.createdAt DESC
         OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;

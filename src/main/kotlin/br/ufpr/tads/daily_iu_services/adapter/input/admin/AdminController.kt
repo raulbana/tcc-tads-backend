@@ -49,17 +49,15 @@ class AdminController(private val adminService: AdminService) {
         @RequestHeader("page", required = false) page: Int?,
         @RequestHeader("size", required = false) size: Int?,
     ): ResponseEntity<List<ContentAdminDTO>> {
-        TODO("Not implemented yet")
+        return ResponseEntity.ok(adminService.getAllReports(page, size))
     }
 
     @PostMapping("/reports/validate")
     @Operation(summary = "Validar denúncia", description = "Marca uma denúncia como válida ou inválida")
     @ApiResponse(responseCode = "204", description = "Denúncia validada com sucesso")
-    fun validateReport(
-        @RequestHeader("x-user-id") userId: Long,
-        @RequestBody request: ReportToggleDTO
-    ): ResponseEntity<Void> {
-        TODO("Not implemented yet")
+    fun validateReport(@RequestBody @Valid request: ReportToggleDTO): ResponseEntity<Void> {
+        adminService.validateReport(request)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/reports/strike")
@@ -69,9 +67,9 @@ class AdminController(private val adminService: AdminService) {
     )
     @ApiResponse(responseCode = "204", description = "Advertência aplicada com sucesso")
     fun applyStrike(
-        @RequestHeader("x-user-id") userId: Long,
-        @RequestHeader("x-target-id") targetContentId: Long
+        @RequestHeader("x-content-id") targetContentId: Long
     ): ResponseEntity<Void> {
-        TODO("Not implemented yet")
+        adminService.applyStrike(targetContentId)
+        return ResponseEntity.noContent().build()
     }
 }

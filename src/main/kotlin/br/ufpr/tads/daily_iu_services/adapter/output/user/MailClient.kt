@@ -59,19 +59,30 @@ class MailClient(private val mailSender: JavaMailSender) {
         message.from = noreplyEmail
         message.setTo(content.author.email)
         message.setCc(supportEmail)
-        message.subject = "Daily IU - Aviso de remoção de conteúdo"
+        message.subject = "Daily IU - Notificação de remoção de conteúdo"
         message.text = "Sua publicação com título \"${content.title}\" recebeu $reportCount denúncias e está sob revisão. Durante esse período, a publicação será ocultada da plataforma. Por favor, revise nossas diretrizes comunitárias para evitar futuras remoções."
 
         mailSender.send(message)
     }
 
-    fun sendUserBanWarning(userEmail: String, strikeCount: Long) {
+    fun sendUserBanWarning(userEmail: String, contentTitle: String, strikeCount: Int) {
         val message = SimpleMailMessage()
         message.from = noreplyEmail
         message.setTo(userEmail)
         message.setCc(supportEmail)
-        message.subject = "Daily IU - Aviso de banimento de usuário"
-        message.text = "Sua conta recebeu $strikeCount advertências devido a violações das diretrizes da comunidade. Por razoes de segurança e para manter a integridade da plataforma, sua conta foi temporariamente suspensa. Por favor, revise nossas diretrizes comunitárias para evitar futuras suspensões.\n\nSe você acredita que isso foi um erro, entre em contato com nossa equipe de suporte."
+        message.subject = "Daily IU - Notificação de advertência"
+        message.text = "Sua conta recebeu $strikeCount advertência(s) devido a violações das diretrizes da comunidade pela publicação \"$contentTitle\", que será permanentemente removida da plataforma.\n\nPor favor, revise nossas diretrizes comunitárias para evitar futuras advertências. A reincidência de advertências poderá levar a uma suspensão temporária.\n\nSe você acredita que isso foi um erro, entre em contato com nossa equipe de suporte."
+
+        mailSender.send(message)
+    }
+
+    fun sendUserBanNotification(userEmail: String) {
+        val message = SimpleMailMessage()
+        message.from = noreplyEmail
+        message.setTo(userEmail)
+        message.setCc(supportEmail)
+        message.subject = "Daily IU - Notificação de suspensão de usuário"
+        message.text = "Sua conta foi suspensa temporariamente devido a múltiplas violações das diretrizes da comunidade.\n\nSe você acredita que isso foi um erro, entre em contato com nossa equipe de suporte."
 
         mailSender.send(message)
     }

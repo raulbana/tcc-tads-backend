@@ -37,7 +37,7 @@ class ContentRepositoryImpl : ContentRepositoryCustom {
         val ids = rows.mapNotNull { row ->
             when (row) {
                 is Array<*> -> (row.getOrNull(0) as? Number)?.toLong()
-                is java.util.Map<*, *> -> (row["id"] as? Number)?.toLong()
+                is Map<*, *> -> (row["id"] as? Number)?.toLong()
                 is Number -> row.toLong()
                 else -> null
             }

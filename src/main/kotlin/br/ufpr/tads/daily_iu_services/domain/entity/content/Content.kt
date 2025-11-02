@@ -48,6 +48,7 @@ data class Content(
     val media: MutableList<ContentMedia> = mutableListOf(),
 
     var visible: Boolean = true,
+    var striked: Boolean = false,
 
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime = LocalDateTime.now()

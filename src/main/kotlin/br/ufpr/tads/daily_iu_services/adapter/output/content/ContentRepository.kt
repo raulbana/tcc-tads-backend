@@ -5,7 +5,9 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface ContentRepository : JpaRepository<Content, Long>, ContentRepositoryCustom {
-    fun findByAuthorId(authorId: Long, pageable: PageRequest): List<Content>
+    fun findByIdAndStrikedFalse(id: Long): Content?
 
-    fun findByVisibleFalse(pageable: PageRequest): List<Content>
+    fun findByAuthorIdAndStrikedFalse(authorId: Long, pageable: PageRequest): List<Content>
+
+    fun findByVisibleFalseAndStrikedFalse(pageable: PageRequest): List<Content>
 }

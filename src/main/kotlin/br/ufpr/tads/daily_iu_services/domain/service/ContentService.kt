@@ -42,7 +42,7 @@ class ContentService (
         val pageable = PageRequest.of(page ?: 0, size ?: 20)
 
         if (profile) {
-            val contents = contentRepository.findByAuthorId(userId, pageable)
+            val contents = contentRepository.findByAuthorIdAndStrikedFalse(userId, pageable)
             return contents.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
         }
 
@@ -51,9 +51,8 @@ class ContentService (
     }
 
     fun getContentById(id: Long, userId: Long): ContentDTO {
-        val content = contentRepository.findById(id).orElseThrow {
+        val content = contentRepository.findByIdAndStrikedFalse(id) ?:
             throw NotFoundException("Conteúdo com id $id não encontrado")
-        }
 
         content.comments.sortBy { it.createdAt }
         if (content.comments.size > 15) {
@@ -114,9 +113,8 @@ class ContentService (
     }
 
     fun updateContent(request: ContentUpdateDTO, contentId: Long, userId: Long): ContentDTO {
-        val existingContent = contentRepository.findById(contentId).orElseThrow {
+        val existingContent = contentRepository.findByIdAndStrikedFalse(contentId) ?:
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
-        }
 
         existingContent.title = request.title
         existingContent.description = request.description
@@ -136,16 +134,18 @@ class ContentService (
     }
 
     fun deleteContent(contentId: Long) {
-        val existingContent = contentRepository.findById(contentId).orElseThrow {
+        val existingContent = contentRepository.findByIdAndStrikedFalse(contentId) ?:
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
-        }
 
         contentRepository.delete(existingContent)
     }
 
     fun repostContent(contentId: Long, request: ContentRepostDTO): ContentDTO {
-        val originalContent = contentRepository.findById(contentId).orElseThrow {
+        val originalContent = contentRepository.findByIdAndStrikedFalse(contentId) ?:
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
+
+        if (originalContent.author.id == request.repostedByUserId) {
+            throw NotAllowedException("Usuário não pode repostar seu próprio conteúdo")
         }
 
         val repostByUser = userRepository.findById(request.repostedByUserId).orElseThrow {
@@ -173,9 +173,8 @@ class ContentService (
     }
 
     fun toggleLikeContent(contentId: Long, toggle: ToggleDTO) {
-        val content = contentRepository.findById(contentId).orElseThrow {
+        val content = contentRepository.findByIdAndStrikedFalse(contentId) ?:
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
-        }
 
         if (toggle.control) {
             val alreadyLiked = content.likes.any { it.userId == toggle.userId }
@@ -193,9 +192,9 @@ class ContentService (
     }
 
     fun toggleSaveContent(contentId: Long, toggle: ToggleDTO) {
-        val content = contentRepository.findById(contentId).orElseThrow {
+        val content = contentRepository.findByIdAndStrikedFalse(contentId) ?:
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
-        }
+
         if (toggle.control) {
             val alreadySaved = savedContentRepository.findByUserIdAndContentId(toggle.userId, contentId)
             if (alreadySaved == null) {
@@ -222,9 +221,9 @@ class ContentService (
     }
 
     fun reportContent(contentId: Long, request: ReportContentDTO) {
-        val content = contentRepository.findById(contentId).orElseThrow {
+        val content = contentRepository.findByIdAndStrikedFalse(contentId) ?:
             throw NotFoundException("Conteúdo com id $contentId não encontrado")
-        }
+
         val reportedByUser = userRepository.findById(request.reporterId).orElseThrow {
             throw NotFoundException("Usuário com id ${request.reporterId} não encontrado")
         }
