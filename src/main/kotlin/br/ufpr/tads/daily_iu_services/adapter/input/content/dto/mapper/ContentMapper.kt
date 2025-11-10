@@ -42,6 +42,7 @@ abstract class ContentMapper {
     @Mapping(target = "author", source = "content.author", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "cover", source = "content.media", qualifiedByName = ["getCoverMedia"])
     @Mapping(target = "media", source = "content.media", qualifiedByName = ["mediasToDTO"])
+    @Mapping(target = "isSaved", source = "saved")
     @Mapping(target = "isLiked", expression = "java(getContentLikeStatus(content.getLikes(), userId))")
     @Mapping(target = "likesCount", source = "content.likes", qualifiedByName = ["countSize"])
     @Mapping(target = "comments", expression = ("java(commentsToDTO(content.getComments(), userId))"))
@@ -51,7 +52,7 @@ abstract class ContentMapper {
     @Mapping(target = "repostedByUser", source = "content.repostByAuthor", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "createdAt", source = "content.createdAt")
     @Mapping(target = "updatedAt", source = "content.updatedAt")
-    abstract fun contentToDTO(content: Content, userId: Long): ContentDTO
+    abstract fun contentToDTO(content: Content, userId: Long, saved: Boolean): ContentDTO
 
     @Named("mediaToUrl")
     fun mediaToUrl(media: Media?) = media?.url

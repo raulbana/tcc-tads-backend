@@ -16,6 +16,7 @@ data class ContentDTO(
     val author: AuthorDTO,
     val cover: MediaDTO?,
     val media: List<MediaDTO>,
+    val isSaved: Boolean,
     val isLiked: Boolean,
     val likesCount: Int,
     val comments: List<CommentDTO>,

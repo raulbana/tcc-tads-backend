@@ -59,7 +59,9 @@ class ContentService (
             content.comments.removeAll { it != content.comments.take(15) }
         }
 
-        return ContentMapper.INSTANCE.contentToDTO(content, userId)
+        val saved = savedContentRepository.existsByUserIdAndContentId(userId, content.id!!)
+
+        return ContentMapper.INSTANCE.contentToDTO(content, userId, saved)
     }
 
     fun createContent(request: ContentCreatorDTO): ContentDTO {
@@ -104,11 +106,11 @@ class ContentService (
                 //content.visible = false
                 val result = contentRepository.save(content)
                 //mailClient.sendContentForAudit(result)
-                return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)
+                return ContentMapper.INSTANCE.contentToDTO(result, request.authorId, saved = false)
             }
         } else {
             val result = contentRepository.save(content)
-            return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)
+            return ContentMapper.INSTANCE.contentToDTO(result, request.authorId, saved = false)
         }
     }
 
@@ -129,8 +131,9 @@ class ContentService (
 
         existingContent.media.addAll(medias)
 
+        val saved = savedContentRepository.existsByUserIdAndContentId(userId, existingContent.id!!)
         val result = contentRepository.save(existingContent)
-        return ContentMapper.INSTANCE.contentToDTO(result, userId)
+        return ContentMapper.INSTANCE.contentToDTO(result, userId, saved)
     }
 
     fun deleteContent(contentId: Long) {
@@ -169,7 +172,7 @@ class ContentService (
         repostedContent.media.addAll(repostMedias)
 
         val result = contentRepository.save(repostedContent)
-        return ContentMapper.INSTANCE.contentToDTO(result, request.repostedByUserId)
+        return ContentMapper.INSTANCE.contentToDTO(result, request.repostedByUserId, saved = false)
     }
 
     fun toggleLikeContent(contentId: Long, toggle: ToggleDTO) {

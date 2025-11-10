@@ -10,4 +10,6 @@ interface SavedContentRepository: JpaRepository<SavedContent, Long> {
     fun findByUserIdAndContent_VisibleTrue(userId: Long): List<SavedContent>
 
     fun findByUserIdAndContentId(userId: Long, contentId: Long): SavedContent?
+
+    fun existsByUserIdAndContentId(userId: Long, contentId: Long): Boolean
 }
