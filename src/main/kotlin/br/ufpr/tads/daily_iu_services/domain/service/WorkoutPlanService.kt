@@ -40,7 +40,7 @@ class WorkoutPlanService(
 
         val workouts = request.workoutIds.map { (order, workoutId) ->
             val workout = workoutRepository.findById(workoutId).orElseThrow {
-                Exception("Treino com id $workoutId não encontrado")
+                NotFoundException("Treino com id $workoutId não encontrado")
             }
             WorkoutPlanWorkout(
                 workoutOrder = order,
@@ -56,7 +56,7 @@ class WorkoutPlanService(
 
     fun updateWorkoutPlan(id: Long, request: WorkoutPlanCreatorDTO): WorkoutPlanDTO {
         val existingWorkoutPlan = workoutPlanRepository.findById(id)
-            .orElseThrow { Exception("Plano de treino com id $id não encontrado") }
+            .orElseThrow { NotFoundException("Plano de treino com id $id não encontrado") }
 
         existingWorkoutPlan.name = request.name
         existingWorkoutPlan.description = request.description
@@ -70,7 +70,7 @@ class WorkoutPlanService(
         existingWorkoutPlan.workouts.clear()
         val updatedWorkouts = request.workoutIds.map { (order, workoutId) ->
             val workout = workoutRepository.findById(workoutId).orElseThrow {
-                Exception("Treino com id $workoutId não encontrado")
+                NotFoundException("Treino com id $workoutId não encontrado")
             }
             WorkoutPlanWorkout(
                 workoutOrder = order,
@@ -86,7 +86,7 @@ class WorkoutPlanService(
 
     fun deleteWorkoutPlan(id: Long) {
         val existingWorkoutPlan = workoutPlanRepository.findById(id)
-            .orElseThrow { Exception("Plano de treino com id $id não encontrado") }
+            .orElseThrow { NotFoundException("Plano de treino com id $id não encontrado") }
         workoutPlanRepository.delete(existingWorkoutPlan)
     }
 
