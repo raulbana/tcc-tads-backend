@@ -28,7 +28,7 @@ class CalendarController(private val calendarService: CalendarService) {
     fun getCalendarEvents(
         @RequestParam(required = false) @ValidDate(required = false) from: LocalDate?,
         @RequestParam(required = false) @ValidDate(required = false) to: LocalDate?,
-        @RequestHeader(value = "user-id") userId: Long
+        @RequestHeader(value = "x-user-id") userId: Long
     ): ResponseEntity<HashMap<String, CalendarDayDTO>> {
         return ResponseEntity.ok(calendarService.getCalendarEvents(userId, from, to))
     }
@@ -37,7 +37,7 @@ class CalendarController(private val calendarService: CalendarService) {
     @Operation(summary = "Adicionar ou atualizar evento no calendário", description = "Adiciona ou atualiza um evento no calendário do usuário para uma data específica.")
     fun setCalendarEvent(
         @RequestBody @Valid request: CalendarRequestDTO,
-        @RequestHeader(value = "user-id") userId: Long
+        @RequestHeader(value = "x-user-id") userId: Long
     ): ResponseEntity<CalendarDayDTO> {
         return ResponseEntity.ok(calendarService.createOrUpdateEvent(userId, request))
     }
