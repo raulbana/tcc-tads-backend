@@ -27,11 +27,16 @@ abstract class ContentMapper {
         val INSTANCE: ContentMapper = Mappers.getMapper(ContentMapper::class.java)
     }
 
-    @Mapping(target = "author", source = "author", qualifiedByName = ["userToAuthorDTO"])
-    @Mapping(target = "cover", source = "media", qualifiedByName = ["getCoverMedia"])
-    @Mapping(target = "categories", source = "categories", qualifiedByName = ["categoriesToString"])
-    @Mapping(target= "isReposted", source = "repost")
-    abstract fun contentToSimpleDTO(entity: Content): ContentSimpleDTO
+    @Mapping(target = "id", source = "entity.id")
+    @Mapping(target = "title", source = "entity.title")
+    @Mapping(target = "categories", source = "entity.categories", qualifiedByName = ["categoriesToString"])
+    @Mapping(target = "author", source = "entity.author", qualifiedByName = ["userToAuthorDTO"])
+    @Mapping(target = "cover", source = "entity.media", qualifiedByName = ["getCoverMedia"])
+    @Mapping(target = "section", source = "section")
+    @Mapping(target = "isReposted", source = "entity.repost")
+    @Mapping(target = "createdAt", source = "entity.createdAt")
+    @Mapping(target = "updatedAt", source = "entity.updatedAt")
+    abstract fun contentToSimpleDTO(entity: Content, section: List<String>? = null): ContentSimpleDTO
 
     @Mapping(target = "id", source = "content.id")
     @Mapping(target = "title", source = "content.title")
@@ -72,15 +77,15 @@ abstract class ContentMapper {
 
     @Named("mediasToDTO")
     fun mediasToDTO(entities: List<ContentMedia>) = entities.map { mediaToDTO(it) }
-    
+
     @Named("commentsToDTO")
     fun commentsToDTO(entities: List<Comment>, userId: Long) = entities.map { commentToDTO(it, userId) }
-    
+
     @Named("getContentLikeStatus")
-    fun getContentLikeStatus(likes: List<ContentLikes>, userId: Long) = likes.any { it.userId == userId}
+    fun getContentLikeStatus(likes: List<ContentLikes>, userId: Long) = likes.any { it.userId == userId }
 
     @Named("getCommentLikeStatus")
-    fun getCommentLikeStatus(likes: List<CommentLikes>, userId: Long) = likes.any { it.userId == userId}
+    fun getCommentLikeStatus(likes: List<CommentLikes>, userId: Long) = likes.any { it.userId == userId }
 
     @Mapping(target = "id", source = "media.id")
     @Mapping(target = "url", source = "media.url")
