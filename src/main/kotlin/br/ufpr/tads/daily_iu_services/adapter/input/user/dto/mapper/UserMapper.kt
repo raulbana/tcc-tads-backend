@@ -16,18 +16,12 @@ import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.factory.Mappers
 
-@Mapper
+@Mapper(uses = [UserMapperHelper::class])
 interface UserMapper {
 
     companion object {
         val INSTANCE: UserMapper = Mappers.getMapper(UserMapper::class.java)
     }
-
-    @Named("mediaToUrl")
-    fun mediaToUrl(media: Media?) = media?.url
-
-    @Named("roleToString")
-    fun roleToString(role: Role) = UserPermissionEnum.fromLevel(role.permissionLevel).label
 
     @Mapping(target = "profile", source = "profile", qualifiedByName = ["patientProfileToPatientProfileDTO"])
     @Mapping(target = "role", source = "role", qualifiedByName = ["roleToString"])
