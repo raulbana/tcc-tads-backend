@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface CommentRepository : JpaRepository<Comment, Long> {
 
+    fun countByContentIdAndReplyFalse(contentId: Long): Int
+
     fun findByContentIdAndReplyFalse(contentId: Long, pageable: Pageable): List<Comment>
 
     fun findByReplies_Id(parentCommentId: Long, pageable: Pageable): List<Comment>

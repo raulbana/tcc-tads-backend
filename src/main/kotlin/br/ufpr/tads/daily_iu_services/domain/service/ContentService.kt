@@ -8,6 +8,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentUpdateDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ReportContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
+import br.ufpr.tads.daily_iu_services.adapter.output.content.CommentRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentCategoryRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentReportsRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentRepository
@@ -35,6 +36,7 @@ class ContentService(
     private val mediaRepository: MediaRepository,
     private val userRepository: UserRepository,
     private val savedContentRepository: SavedContentRepository,
+    private val commentRepository: CommentRepository,
     private val reportsRepository: ContentReportsRepository,
     private val mailClient: MailClient
 ) {
@@ -104,14 +106,12 @@ class ContentService(
         val content = contentRepository.findByIdAndStrikedFalse(id)
             ?: throw NotFoundException("Conteúdo com id $id não encontrado")
 
-        content.comments.sortBy { it.createdAt }
-        if (content.comments.size > 15) {
-            content.comments.removeAll { it != content.comments.take(15) }
-        }
-
         val saved = savedContentRepository.existsByUserIdAndContentId(userId, content.id!!)
+        val totalComments = commentRepository.countByContentIdAndReplyFalse(id)
+        content.comments.clear()
+        content.comments.addAll(commentRepository.findByContentIdAndReplyFalse(id, PageRequest.of(0, 20)))
 
-        return ContentMapper.INSTANCE.contentToDTO(content, userId, saved)
+        return ContentMapper.INSTANCE.contentToDTO(content, userId, saved, totalComments)
     }
 
     fun createContent(request: ContentCreatorDTO): ContentDTO {
@@ -156,11 +156,11 @@ class ContentService(
                 //content.visible = false
                 val result = contentRepository.save(content)
                 //mailClient.sendContentForAudit(result)
-                return ContentMapper.INSTANCE.contentToDTO(result, request.authorId, saved = false)
+                return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)
             }
         } else {
             val result = contentRepository.save(content)
-            return ContentMapper.INSTANCE.contentToDTO(result, request.authorId, saved = false)
+            return ContentMapper.INSTANCE.contentToDTO(result, request.authorId)
         }
     }
 
@@ -183,7 +183,10 @@ class ContentService(
 
         val saved = savedContentRepository.existsByUserIdAndContentId(userId, existingContent.id!!)
         val result = contentRepository.save(existingContent)
-        return ContentMapper.INSTANCE.contentToDTO(result, userId, saved)
+        val totalComments = commentRepository.countByContentIdAndReplyFalse(contentId)
+        result.comments.clear()
+        result.comments.addAll(commentRepository.findByContentIdAndReplyFalse(contentId, PageRequest.of(0, 20)))
+        return ContentMapper.INSTANCE.contentToDTO(result, userId, saved, totalComments)
     }
 
     fun deleteContent(contentId: Long) {
@@ -222,7 +225,7 @@ class ContentService(
         repostedContent.media.addAll(repostMedias)
 
         val result = contentRepository.save(repostedContent)
-        return ContentMapper.INSTANCE.contentToDTO(result, request.repostedByUserId, saved = false)
+        return ContentMapper.INSTANCE.contentToDTO(result, request.repostedByUserId)
     }
 
     fun toggleLikeContent(contentId: Long, toggle: ToggleDTO) {
