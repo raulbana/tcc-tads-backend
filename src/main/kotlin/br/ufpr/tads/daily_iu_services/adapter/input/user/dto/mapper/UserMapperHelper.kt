@@ -8,7 +8,7 @@ import org.mapstruct.Named
 object UserMapperHelper {
     @JvmStatic
     @Named("mediaToUrl")
-    fun mediaToUrl(media: Media?) = media?.url ?: ""
+    fun mediaToUrl(media: Media?): String? = media?.url
 
     @JvmStatic
     @Named("roleToString")
