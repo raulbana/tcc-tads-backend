@@ -8,6 +8,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ContentUpdateDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ReportContentDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.ToggleDTO
 import br.ufpr.tads.daily_iu_services.adapter.input.content.dto.mapper.ContentMapper
+import br.ufpr.tads.daily_iu_services.adapter.output.content.CommentRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentCategoryRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentReportsRepository
 import br.ufpr.tads.daily_iu_services.adapter.output.content.ContentRepository
@@ -26,14 +27,16 @@ import br.ufpr.tads.daily_iu_services.exception.NotFoundException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.PriorityQueue
 
 @Service
-class ContentService (
+class ContentService(
     private val contentRepository: ContentRepository,
     private val categoryRepository: ContentCategoryRepository,
     private val mediaRepository: MediaRepository,
     private val userRepository: UserRepository,
     private val savedContentRepository: SavedContentRepository,
+    private val commentRepository: CommentRepository,
     private val reportsRepository: ContentReportsRepository,
     private val mailClient: MailClient
 ) {
@@ -47,19 +50,68 @@ class ContentService (
         }
 
         val recommended = contentRepository.findRecommendedByUserLikes(userId, pageable)
-        return recommended.content.map { ContentMapper.INSTANCE.contentToSimpleDTO(it) }
+        val sectionsMap = mutableMapOf<Long, MutableList<String>>()
+
+        // otimização: uma passagem para coletar top-K usando heaps e popular o mapa de seções
+        val contents = recommended.content
+        val k = (contents.size * 0.3).toInt().coerceAtLeast(1)
+
+        val likesHeap = PriorityQueue<Content>(compareBy { it.likes.size })
+        val commentsHeap = PriorityQueue<Content>(compareBy { it.comments.size })
+        val recentHeap = PriorityQueue<Content>(compareBy { it.createdAt })
+        val trendingScore: (Content) -> Double = { c ->
+            val ageInHours =
+                java.time.Duration.between(c.createdAt, LocalDateTime.now()).toHours().toDouble().coerceAtLeast(1.0)
+            (c.likes.size + c.comments.size).toDouble() / ageInHours
+        }
+        val trendingHeap = PriorityQueue(compareBy(trendingScore))
+
+        for (content in contents) {
+            val id = content.id!!
+            sectionsMap[id] = sectionsMap.getOrDefault(id, mutableListOf())
+            likesHeap.add(content); if (likesHeap.size > k) likesHeap.poll()
+            commentsHeap.add(content); if (commentsHeap.size > k) commentsHeap.poll()
+            recentHeap.add(content); if (recentHeap.size > k) recentHeap.poll()
+            trendingHeap.add(content); if (trendingHeap.size > k) trendingHeap.poll()
+        }
+
+        while (likesHeap.isNotEmpty()) {
+            val c = likesHeap.poll()
+            sectionsMap[c.id!!]?.add("Mais curtidas")
+        }
+        while (commentsHeap.isNotEmpty()) {
+            val c = commentsHeap.poll()
+            sectionsMap[c.id!!]?.add("Mais comentadas")
+        }
+        while (recentHeap.isNotEmpty()) {
+            val c = recentHeap.poll()
+            sectionsMap[c.id!!]?.add("Mais recentes")
+        }
+        while (trendingHeap.isNotEmpty()) {
+            val c = trendingHeap.poll()
+            sectionsMap[c.id!!]?.add("Em alta")
+        }
+
+        // você também pode gostar = conteúdos sem nenhuma seção
+        for ((_, sections) in sectionsMap) {
+            if (sections.isEmpty()) {
+                sections.add("Você também pode gostar")
+            }
+        }
+
+        return recommended.content.map { ContentMapper.INSTANCE.contentToSimpleDTO(it, sectionsMap[it.id]) }
     }
 
     fun getContentById(id: Long, userId: Long): ContentDTO {
-        val content = contentRepository.findByIdAndStrikedFalse(id) ?:
-            throw NotFoundException("Conteúdo com id $id não encontrado")
+        val content = contentRepository.findByIdAndStrikedFalse(id)
+            ?: throw NotFoundException("Conteúdo com id $id não encontrado")
 
-        content.comments.sortBy { it.createdAt }
-        if (content.comments.size > 15) {
-            content.comments.removeAll { it != content.comments.take(15) }
-        }
+        val saved = savedContentRepository.existsByUserIdAndContentId(userId, content.id!!)
+        val totalComments = commentRepository.countByContentIdAndReplyFalse(id)
+        content.comments.clear()
+        content.comments.addAll(commentRepository.findByContentIdAndReplyFalse(id, PageRequest.of(0, 20)))
 
-        return ContentMapper.INSTANCE.contentToDTO(content, userId)
+        return ContentMapper.INSTANCE.contentToDTO(content, userId, saved, totalComments)
     }
 
     fun createContent(request: ContentCreatorDTO): ContentDTO {
@@ -113,8 +165,8 @@ class ContentService (
     }
 
     fun updateContent(request: ContentUpdateDTO, contentId: Long, userId: Long): ContentDTO {
-        val existingContent = contentRepository.findByIdAndStrikedFalse(contentId) ?:
-            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        val existingContent = contentRepository.findByIdAndStrikedFalse(contentId)
+            ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
         existingContent.title = request.title
         existingContent.description = request.description
@@ -129,20 +181,24 @@ class ContentService (
 
         existingContent.media.addAll(medias)
 
+        val saved = savedContentRepository.existsByUserIdAndContentId(userId, existingContent.id!!)
         val result = contentRepository.save(existingContent)
-        return ContentMapper.INSTANCE.contentToDTO(result, userId)
+        val totalComments = commentRepository.countByContentIdAndReplyFalse(contentId)
+        result.comments.clear()
+        result.comments.addAll(commentRepository.findByContentIdAndReplyFalse(contentId, PageRequest.of(0, 20)))
+        return ContentMapper.INSTANCE.contentToDTO(result, userId, saved, totalComments)
     }
 
     fun deleteContent(contentId: Long) {
-        val existingContent = contentRepository.findByIdAndStrikedFalse(contentId) ?:
-            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        val existingContent = contentRepository.findByIdAndStrikedFalse(contentId)
+            ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
         contentRepository.delete(existingContent)
     }
 
     fun repostContent(contentId: Long, request: ContentRepostDTO): ContentDTO {
-        val originalContent = contentRepository.findByIdAndStrikedFalse(contentId) ?:
-            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        val originalContent = contentRepository.findByIdAndStrikedFalse(contentId)
+            ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
         if (originalContent.author.id == request.repostedByUserId) {
             throw NotAllowedException("Usuário não pode repostar seu próprio conteúdo")
@@ -173,8 +229,8 @@ class ContentService (
     }
 
     fun toggleLikeContent(contentId: Long, toggle: ToggleDTO) {
-        val content = contentRepository.findByIdAndStrikedFalse(contentId) ?:
-            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        val content = contentRepository.findByIdAndStrikedFalse(contentId)
+            ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
         if (toggle.control) {
             val alreadyLiked = content.likes.any { it.userId == toggle.userId }
@@ -192,8 +248,8 @@ class ContentService (
     }
 
     fun toggleSaveContent(contentId: Long, toggle: ToggleDTO) {
-        val content = contentRepository.findByIdAndStrikedFalse(contentId) ?:
-            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        val content = contentRepository.findByIdAndStrikedFalse(contentId)
+            ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
         if (toggle.control) {
             val alreadySaved = savedContentRepository.findByUserIdAndContentId(toggle.userId, contentId)
@@ -221,8 +277,8 @@ class ContentService (
     }
 
     fun reportContent(contentId: Long, request: ReportContentDTO) {
-        val content = contentRepository.findByIdAndStrikedFalse(contentId) ?:
-            throw NotFoundException("Conteúdo com id $contentId não encontrado")
+        val content = contentRepository.findByIdAndStrikedFalse(contentId)
+            ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
         val reportedByUser = userRepository.findById(request.reporterId).orElseThrow {
             throw NotFoundException("Usuário com id ${request.reporterId} não encontrado")

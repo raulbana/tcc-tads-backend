@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class OnboardSubmission(
-    val message: String = "Perguntas obrigatórias obrigatórios ausentes ou em branco",
+    val message: String = "Perguntas obrigatórias ausentes ou em branco",
     val groups: Array<KClass<*>> = [],
     val payload: Array<KClass<out Payload>> = []
 )

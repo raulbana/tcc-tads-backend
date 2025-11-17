@@ -27,11 +27,16 @@ abstract class ContentMapper {
         val INSTANCE: ContentMapper = Mappers.getMapper(ContentMapper::class.java)
     }
 
-    @Mapping(target = "author", source = "author", qualifiedByName = ["userToAuthorDTO"])
-    @Mapping(target = "cover", source = "media", qualifiedByName = ["getCoverMedia"])
-    @Mapping(target = "categories", source = "categories", qualifiedByName = ["categoriesToString"])
-    @Mapping(target= "isReposted", source = "repost")
-    abstract fun contentToSimpleDTO(entity: Content): ContentSimpleDTO
+    @Mapping(target = "id", source = "entity.id")
+    @Mapping(target = "title", source = "entity.title")
+    @Mapping(target = "categories", source = "entity.categories", qualifiedByName = ["categoriesToString"])
+    @Mapping(target = "author", source = "entity.author", qualifiedByName = ["userToAuthorDTO"])
+    @Mapping(target = "cover", source = "entity.media", qualifiedByName = ["getCoverMedia"])
+    @Mapping(target = "section", source = "section")
+    @Mapping(target = "isReposted", source = "entity.repost")
+    @Mapping(target = "createdAt", source = "entity.createdAt")
+    @Mapping(target = "updatedAt", source = "entity.updatedAt")
+    abstract fun contentToSimpleDTO(entity: Content, section: List<String>? = null): ContentSimpleDTO
 
     @Mapping(target = "id", source = "content.id")
     @Mapping(target = "title", source = "content.title")
@@ -42,16 +47,17 @@ abstract class ContentMapper {
     @Mapping(target = "author", source = "content.author", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "cover", source = "content.media", qualifiedByName = ["getCoverMedia"])
     @Mapping(target = "media", source = "content.media", qualifiedByName = ["mediasToDTO"])
+    @Mapping(target = "isSaved", source = "saved")
     @Mapping(target = "isLiked", expression = "java(getContentLikeStatus(content.getLikes(), userId))")
     @Mapping(target = "likesCount", source = "content.likes", qualifiedByName = ["countSize"])
     @Mapping(target = "comments", expression = ("java(commentsToDTO(content.getComments(), userId))"))
-    @Mapping(target = "commentsCount", source = "content.comments", qualifiedByName = ["countSize"])
+    @Mapping(target = "commentsCount", source = "totalComments")
     @Mapping(target = "isReposted", source = "content.repost")
     @Mapping(target = "repostedFromContentId", source = "content.repostFromContentId")
     @Mapping(target = "repostedByUser", source = "content.repostByAuthor", qualifiedByName = ["userToAuthorDTO"])
     @Mapping(target = "createdAt", source = "content.createdAt")
     @Mapping(target = "updatedAt", source = "content.updatedAt")
-    abstract fun contentToDTO(content: Content, userId: Long): ContentDTO
+    abstract fun contentToDTO(content: Content, userId: Long, saved: Boolean = false, totalComments: Int = 0): ContentDTO
 
     @Named("mediaToUrl")
     fun mediaToUrl(media: Media?) = media?.url
@@ -71,15 +77,15 @@ abstract class ContentMapper {
 
     @Named("mediasToDTO")
     fun mediasToDTO(entities: List<ContentMedia>) = entities.map { mediaToDTO(it) }
-    
+
     @Named("commentsToDTO")
     fun commentsToDTO(entities: List<Comment>, userId: Long) = entities.map { commentToDTO(it, userId) }
-    
+
     @Named("getContentLikeStatus")
-    fun getContentLikeStatus(likes: List<ContentLikes>, userId: Long) = likes.any { it.userId == userId}
+    fun getContentLikeStatus(likes: List<ContentLikes>, userId: Long) = likes.any { it.userId == userId }
 
     @Named("getCommentLikeStatus")
-    fun getCommentLikeStatus(likes: List<CommentLikes>, userId: Long) = likes.any { it.userId == userId}
+    fun getCommentLikeStatus(likes: List<CommentLikes>, userId: Long) = likes.any { it.userId == userId }
 
     @Mapping(target = "id", source = "media.id")
     @Mapping(target = "url", source = "media.url")

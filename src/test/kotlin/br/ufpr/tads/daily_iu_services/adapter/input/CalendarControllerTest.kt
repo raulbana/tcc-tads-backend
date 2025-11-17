@@ -22,7 +22,7 @@ class CalendarControllerTest() {
     @Test
     fun `Deve retornar 200 ao buscar eventos do calendario para usuario 2`() {
         mvc.perform(MockMvcRequestBuilders.get("/v1/calendar")
-            .header("user-id", "2")
+            .header("x-user-id", "2")
         ).andExpect(MockMvcResultMatchers.status().isOk)
     }
 
