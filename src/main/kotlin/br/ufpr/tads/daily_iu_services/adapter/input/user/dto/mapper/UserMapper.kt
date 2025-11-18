@@ -8,9 +8,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserSimpleDTO
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
 import br.ufpr.tads.daily_iu_services.domain.entity.user.PatientProfile
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Preferences
-import br.ufpr.tads.daily_iu_services.domain.entity.user.Role
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
-import br.ufpr.tads.daily_iu_services.domain.entity.user.UserPermissionEnum
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
@@ -41,9 +39,6 @@ interface UserMapper {
 
     @Named("preferencesToPreferencesDTO")
     fun preferencesToPreferencesDTO(preferences: Preferences): PreferencesDTO
-
-    @Named("patientProfileDTOToPatientProfile")
-    fun patientProfileDTOToPatientProfile(profileDTO: PatientProfileDTO?): PatientProfile?
 
     @Named("patientProfileToPatientProfileDTO")
     fun patientProfileToPatientProfileDTO(profile: PatientProfile?): PatientProfileDTO?

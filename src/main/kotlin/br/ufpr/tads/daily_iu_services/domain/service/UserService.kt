@@ -25,6 +25,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseFeedback
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.UserWorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Credential
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
+import br.ufpr.tads.daily_iu_services.domain.entity.user.PatientProfile
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Preferences
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Role
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
@@ -74,7 +75,18 @@ class UserService(
             salt = salt
         )
 
-        val patientProfile = UserMapper.INSTANCE.patientProfileDTOToPatientProfile(request.profile)
+        val patientProfile = request.profile?.let {
+            PatientProfile(
+                birthDate = it.birthDate,
+                gender = it.gender,
+                iciq3answer = it.iciq3answer,
+                iciq4answer = it.iciq4answer,
+                iciq5answer = it.iciq5answer,
+                iciqScore = it.iciqScore,
+                urinationLoss = it.urinationLoss
+            )
+        }
+
         val preferences = UserMapper.INSTANCE.preferencesDTOToPreferences(request.preferences) ?: Preferences(
             highContrast = false,
             bigFont = false,
