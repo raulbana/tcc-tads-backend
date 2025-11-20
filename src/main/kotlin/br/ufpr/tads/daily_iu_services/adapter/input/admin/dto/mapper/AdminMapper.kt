@@ -23,9 +23,16 @@ interface AdminMapper {
 
     companion object {
         val INSTANCE: AdminMapper = Mappers.getMapper(AdminMapper::class.java)
+
+        @JvmStatic
+        @Named("blockedToStatus")
+        fun blockedToStatus(blocked: Boolean): String {
+            return if (blocked) "Bloqueado" else "Ativo"
+        }
     }
 
     @Mapping(target = "role", source = "role", qualifiedByName = ["toRoleDTO"])
+    @Mapping(target = "status", source = "blocked", qualifiedByName = ["blockedToStatus"])
     fun toUserAdminViewDTO(user: User): UserAdminViewDTO
 
     @Named("toRoleDTO")
