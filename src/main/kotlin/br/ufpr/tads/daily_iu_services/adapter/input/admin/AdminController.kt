@@ -1,21 +1,13 @@
 package br.ufpr.tads.daily_iu_services.adapter.input.admin
 
-import br.ufpr.tads.daily_iu_services.adapter.input.admin.dto.ContentAdminDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.admin.dto.ReportToggleDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.admin.dto.RoleAssignerDTO
-import br.ufpr.tads.daily_iu_services.adapter.input.admin.dto.UserAdminViewDTO
+import br.ufpr.tads.daily_iu_services.adapter.input.admin.dto.*
 import br.ufpr.tads.daily_iu_services.domain.service.AdminService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v1/admin")
@@ -38,6 +30,16 @@ class AdminController(private val adminService: AdminService) {
         @RequestBody @Valid request: RoleAssignerDTO
     ): ResponseEntity<UserAdminViewDTO> {
         return ResponseEntity.ok(adminService.setUserRole(adminId, request))
+    }
+
+    @PatchMapping("/users/status")
+    @Operation(summary = "Definir status do usuário (Ativo/Bloqueado)", description = "Ativa ou bloqueia um usuário")
+    fun setUserStatus(
+        @RequestHeader("x-user-id") adminId: Long,
+        @RequestBody @Valid request: StatusAssignerDTO
+    ): ResponseEntity<Void> {
+        ResponseEntity.ok(adminService.setUserStatus(adminId, request))
+        return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/reports")
