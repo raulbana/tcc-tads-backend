@@ -14,8 +14,8 @@ data class RoleCreatorDTO (
     val reason: String,
 
     @field:NotNull
-    val documentType: String,
+    val documentType: String?,
 
     @field:NotNull
-    val documentValue: String
+    val documentValue: String?
 )
