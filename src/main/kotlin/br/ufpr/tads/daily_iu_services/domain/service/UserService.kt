@@ -90,6 +90,7 @@ class UserService(
         val preferences = UserMapper.INSTANCE.preferencesDTOToPreferences(request.preferences) ?: Preferences(
             highContrast = false,
             bigFont = false,
+            darkMode = false,
             reminderWorkout = false,
             reminderCalendar = false,
             encouragingMessages = false

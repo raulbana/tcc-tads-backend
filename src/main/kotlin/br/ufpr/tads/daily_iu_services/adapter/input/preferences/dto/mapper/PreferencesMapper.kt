@@ -16,6 +16,7 @@ interface PreferencesMapper {
 
     @Mapping(target = "isBigFont", source = "user.preferences.bigFont")
     @Mapping(target = "isHighContrast", source = "user.preferences.highContrast")
+    @Mapping(target = "isDarkMode", source = "user.preferences.darkMode")
     fun userToAccessibilityDTO(user: User): AccessibilityDTO
 
     @Mapping(target = "reminderCalendar", source = "user.preferences.reminderCalendar")

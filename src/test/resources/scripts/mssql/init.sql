@@ -42,6 +42,7 @@ CREATE TABLE preferences (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     highContrast BIT NOT NULL DEFAULT 0,
     bigFont BIT NOT NULL DEFAULT 0,
+    darkMode BIT NOT NULL DEFAULT 0,
     reminderCalendar BIT NOT NULL DEFAULT 0,
     reminderCalendarSchedule TIME,
     reminderWorkout BIT NOT NULL DEFAULT 0,

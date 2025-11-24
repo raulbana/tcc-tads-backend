@@ -8,4 +8,7 @@ data class AccessibilityDTO(
 
     @field:JsonProperty(required = true)
     val isHighContrast: Boolean,
+
+    @field:JsonProperty(required = true)
+    val isDarkMode: Boolean
 )
