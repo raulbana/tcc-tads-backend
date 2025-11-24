@@ -12,5 +12,7 @@ data class QuestionDTO(
     val max: Int?,
     val step: Int?,
     val required: Boolean?,
-    val placeholder: String?
+    val placeholder: String?,
+    val hidden: Boolean?,
+    val answer: String?
 )
