@@ -2,20 +2,16 @@ package br.ufpr.tads.daily_iu_services.domain.service
 
 import br.ufpr.tads.daily_iu_services.adapter.input.media.dto.MediaCreateDTO
 import br.ufpr.tads.daily_iu_services.adapter.output.media.AzureBSClient
-import org.bytedeco.javacv.FFmpegFrameGrabber
-import org.bytedeco.javacv.Java2DFrameConverter
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.Locale
 import java.util.UUID
-import javax.imageio.ImageIO
+import java.util.concurrent.TimeUnit
 
 @Service
 class MediaService(private val azureClient: AzureBSClient) {
@@ -42,9 +38,10 @@ class MediaService(private val azureClient: AzureBSClient) {
                 val coverInputStream = extractCoverImageFromVideo(file)
                 if (coverInputStream != null) {
                     val coverUniqueFilename = "${UUID.randomUUID()}.jpg"
-                    val coverSize = coverInputStream.available().toLong()
+                    val coverBytes = coverInputStream.readAllBytes()
+                    val coverSize = coverBytes.size.toLong()
 
-                    val coverBlobUrl = azureClient.upload(coverInputStream, coverSize, coverUniqueFilename, "cover.jpg")
+                    val coverBlobUrl = azureClient.upload(ByteArrayInputStream(coverBytes), coverSize, coverUniqueFilename, "cover.jpg")
                     media.add(MediaCreateDTO(coverBlobUrl, "image/jpeg", coverSize))
                 }
             }
@@ -64,42 +61,53 @@ class MediaService(private val azureClient: AzureBSClient) {
 
     private fun extractCoverImageFromVideo(file: MultipartFile): InputStream? {
         var tempFile: File? = null
-        var grabber: FFmpegFrameGrabber? = null
+        var tempImage: File? = null
 
         return try {
-            // salva em arquivo temporário
-            tempFile = File.createTempFile("video-", "." + getFileExtension(file.originalFilename))
+            // salva em arquivo temporário (vídeo)
+            tempFile = File.createTempFile("video-", ".${getFileExtension(file.originalFilename)}")
             file.inputStream.use { input ->
                 Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
 
-            // cria e inicia o grabber (usar caminho evita passar opções indesejadas ao avformat_open_input)
-            grabber = FFmpegFrameGrabber(tempFile.absolutePath)
-            grabber.start()
+            // cria arquivo temporário para imagem
+            tempImage = File.createTempFile("cover-", ".jpg")
 
-            // posiciona em 1 segundo (timestamp em microssegundos)
-            val targetTimestampUs = 1_000_000L
-            if (grabber.lengthInTime > 0 && targetTimestampUs < grabber.lengthInTime) {
-                grabber.timestamp = targetTimestampUs
+            // comando ffmpeg: seek em 1s e extrai um frame
+            val command = listOf(
+                "ffmpeg",
+                "-y",
+                "-ss", "1",
+                "-i", tempFile.absolutePath,
+                "-frames:v", "1",
+                "-q:v", "2",
+                tempImage.absolutePath
+            )
+
+            val process = ProcessBuilder(command)
+                .redirectErrorStream(true)
+                .start()
+
+            // aguarda com timeout (10s)
+            val finished = process.waitFor(10, TimeUnit.SECONDS)
+            if (!finished || process.exitValue() != 0) {
+                // se falhou, tenta ler saída para debug (não lança exceção)
+                try {
+                    val err = process.inputStream.readAllBytes().toString(Charsets.UTF_8)
+                    System.err.println("ffmpeg failed: $err")
+                } catch (_: Exception) {}
+                return null
             }
 
-            // tenta capturar um frame de imagem
-            val frame = grabber.grabImage() ?: grabber.grab() ?: return null
-
-            // converte para BufferedImage
-            val converter = Java2DFrameConverter()
-            val buffered: BufferedImage = converter.convert(frame) ?: return null
-
-            // escreve JPEG em bytes e retorna InputStream
-            val baos = ByteArrayOutputStream()
-            ImageIO.write(buffered, "jpg", baos)
-            ByteArrayInputStream(baos.toByteArray())
+            // lê bytes da imagem criada
+            val bytes = Files.readAllBytes(tempImage.toPath())
+            ByteArrayInputStream(bytes)
         } catch (ex: Exception) {
             ex.printStackTrace()
             null
         } finally {
-            try { grabber?.stop(); grabber?.release() } catch (_: Exception) {}
             try { tempFile?.delete() } catch (_: Exception) {}
+            try { tempImage?.delete() } catch (_: Exception) {}
         }
     }
 }

@@ -1,7 +1,12 @@
 # Imagem base do Java para a aplicação
-FROM openjdk:17-ea-slim
+FROM openjdk:21-ea-17-slim-bullseye
 
 WORKDIR /app
+
+# instala ffmpeg (embutir a dependência no container)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copia os arquivos da pasta target para a imagem Docker
 COPY target /app/target
