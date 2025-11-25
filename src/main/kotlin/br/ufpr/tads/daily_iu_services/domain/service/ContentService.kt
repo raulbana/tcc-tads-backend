@@ -306,4 +306,16 @@ class ContentService(
             }
         }
     }
+
+    fun getUserContentStats(userId: Long): Map<String, Long> {
+        val totalContents = contentRepository.countByAuthorIdAndStrikedFalse(userId)
+        val totalLikes = contentRepository.countTotalLikesByAuthorIdAndStrikedFalse(userId) ?: 0L
+        val totalSaves = savedContentRepository.countByUserIdAndContent_StrikedFalse(userId) ?: 0L
+
+        return mapOf (
+            "postagens" to totalContents,
+            "curtidas" to totalLikes,
+            "salvos" to totalSaves
+        )
+    }
 }

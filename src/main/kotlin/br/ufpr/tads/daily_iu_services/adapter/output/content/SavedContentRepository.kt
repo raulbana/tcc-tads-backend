@@ -12,4 +12,6 @@ interface SavedContentRepository: JpaRepository<SavedContent, Long> {
     fun findByUserIdAndContentId(userId: Long, contentId: Long): SavedContent?
 
     fun existsByUserIdAndContentId(userId: Long, contentId: Long): Boolean
+
+    fun countByUserIdAndContent_StrikedFalse(userId: Long): Long?
 }

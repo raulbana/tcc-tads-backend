@@ -43,6 +43,7 @@ class UserService(
     private val tokenService: TokenJWTService,
     private val calendarService: CalendarService,
     private val workoutPlanService: WorkoutPlanService,
+    private val contentService: ContentService,
     private val userRepository: UserRepository,
     private val otpRepository: OTPRepository,
     private val mediaRepository: MediaRepository,
@@ -181,7 +182,12 @@ class UserService(
             NotFoundException("Usuário com ID $id não encontrado")
         }
 
-        return UserMapper.INSTANCE.userToUserSimpleDTO(user)
+        val contentStats = contentService.getUserContentStats(user.id!!)
+        val curtidas = contentStats["curtidas"] ?: 0
+        val salvos = contentStats["salvos"] ?: 0
+        val postagens = contentStats["postagens"] ?: 0
+
+        return UserMapper.INSTANCE.userToUserSimpleDTO(user, curtidas, salvos, postagens)
     }
 
     fun login(requestDTO: LoginRequestDTO): LoginResponseDTO {
