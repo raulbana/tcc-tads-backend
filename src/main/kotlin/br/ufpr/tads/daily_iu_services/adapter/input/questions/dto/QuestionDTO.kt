@@ -3,7 +3,7 @@ package br.ufpr.tads.daily_iu_services.adapter.input.questions.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class QuestionDTO(
+data class QuestionDTO (
     val id: String,
     val text: String,
     val type: String,
@@ -13,6 +13,6 @@ data class QuestionDTO(
     val step: Int?,
     val required: Boolean?,
     val placeholder: String?,
-    val hidden: Boolean?,
-    val answer: String?
+    var hidden: Boolean = false,
+    var answer: Any? = null
 )
