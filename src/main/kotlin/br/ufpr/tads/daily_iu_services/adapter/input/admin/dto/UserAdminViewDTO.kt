@@ -4,5 +4,6 @@ data class UserAdminViewDTO (
     val id: Long? = null,
     val name: String,
     val email: String,
-    val role: RoleDTO
+    val role: RoleDTO,
+    val status: String,
 )
