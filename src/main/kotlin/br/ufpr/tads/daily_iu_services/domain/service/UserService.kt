@@ -191,7 +191,7 @@ class UserService(
     }
 
     fun login(requestDTO: LoginRequestDTO): LoginResponseDTO {
-        val user = userRepository.findByEmail(requestDTO.email)
+        val user = userRepository.findByEmailAndBlockedFalse(requestDTO.email)
             ?: throw NotFoundException("Usuário ou senha inválidos")
 
         if (!passwordService.verifyPassword(requestDTO.password, user.credential)) {
@@ -205,7 +205,7 @@ class UserService(
     }
 
     fun sendEmailOTP(email: String) {
-        val user = userRepository.findByEmail(email)
+        val user = userRepository.findByEmailAndBlockedFalse(email)
 
         if (user != null) {
             val otp = generateOTP(user)
@@ -214,7 +214,7 @@ class UserService(
     }
 
     fun resetPassword(request: ChangePasswordDTO) {
-        val user = userRepository.findByEmail(request.email)
+        val user = userRepository.findByEmailAndBlockedFalse(request.email)
             ?: throw NotFoundException("Usuário com e-mail ${request.email} não encontrado")
 
         val otp = otpRepository.findByUserIdAndUsedFalse(user.id!!)
