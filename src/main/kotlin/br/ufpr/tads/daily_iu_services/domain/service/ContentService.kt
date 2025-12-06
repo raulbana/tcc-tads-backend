@@ -193,7 +193,9 @@ class ContentService(
         val existingContent = contentRepository.findByIdAndStrikedFalse(contentId)
             ?: throw NotFoundException("Conteúdo com id $contentId não encontrado")
 
-        contentRepository.delete(existingContent)
+        existingContent.visible = false
+        existingContent.striked = true
+        contentRepository.save(existingContent)
     }
 
     fun repostContent(contentId: Long, request: ContentRepostDTO): ContentDTO {
