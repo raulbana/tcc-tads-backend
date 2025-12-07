@@ -18,7 +18,7 @@ class ContactService(
     }
 
     fun sendProfessionalRequestEmail(request: ProfessionalRequestDTO) {
-        val user = userRepository.findByEmail(request.email) ?: throw NotFoundException("Usuário com email ${request.email} não encontrado.")
+        val user = userRepository.findByEmailAndBlockedFalse(request.email) ?: throw NotFoundException("Usuário com email ${request.email} não encontrado.")
 
         if (user.blocked) {
             throw IllegalStateException("Usuário com email ${request.email} está bloqueado. Não é possível enviar solicitações profissionais.")

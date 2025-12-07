@@ -5,6 +5,7 @@ import java.time.LocalTime
 data class PreferencesDTO(
     val highContrast: Boolean,
     val bigFont: Boolean,
+    val darkMode: Boolean,
     val reminderCalendar: Boolean,
     val reminderCalendarSchedule: LocalTime?,
     val reminderWorkout: Boolean,

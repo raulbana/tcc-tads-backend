@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,8 +24,8 @@ class QuestionsController(private val service: QuestionService) {
 
     @GetMapping("/onboard")
     @Operation(summary = "Obter perguntas iniciais", description = "Recupera as perguntas iniciais do onboarding")
-    fun getInitialQuestions(): ResponseEntity<List<QuestionDTO>> {
-        return ResponseEntity.ok(service.getInitialQuestions())
+    fun getInitialQuestions(@RequestHeader(value = "x-user-id", required = false) userId: Long?): ResponseEntity<List<QuestionDTO>> {
+        return ResponseEntity.ok(service.getInitialQuestions(userId))
     }
 
     @PostMapping("/onboard")

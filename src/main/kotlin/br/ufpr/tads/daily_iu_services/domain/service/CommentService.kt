@@ -118,6 +118,8 @@ class CommentService(
             throw NotFoundException("Comentário com id $commentId não encontrado")
         }
 
+        if (comment.replies.isNotEmpty()) commentRepository.deleteAll(comment.replies)
+
         commentRepository.delete(comment)
     }
 }

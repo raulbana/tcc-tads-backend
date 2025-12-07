@@ -10,4 +10,8 @@ interface ContentRepository : JpaRepository<Content, Long>, ContentRepositoryCus
     fun findByAuthorIdAndStrikedFalse(authorId: Long, pageable: PageRequest): List<Content>
 
     fun findByVisibleFalseAndStrikedFalse(pageable: PageRequest): List<Content>
+
+    fun countByAuthorIdAndStrikedFalse(userId: Long): Long
+
+    fun countTotalLikesByAuthorIdAndStrikedFalse(userId: Long): Long?
 }

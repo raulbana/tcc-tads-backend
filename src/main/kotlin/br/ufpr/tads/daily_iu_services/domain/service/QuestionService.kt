@@ -33,8 +33,35 @@ class QuestionService(
     private val patientProfileRepository: PatientProfileRepository
 ) {
 
-    fun getInitialQuestions(): List<QuestionDTO> {
-        return repository.findAll().map { QuestionMapper.INSTANCE.questionToQuestionDTO(it) }
+    fun getInitialQuestions(userId: Long?): List<QuestionDTO> {
+        val questions = repository.findAll().map { QuestionMapper.INSTANCE.questionToQuestionDTO(it) }
+
+        if (userId != null) {
+            val user: User = userRepository.findById(userId).orElseThrow {
+                NotFoundException("Usuário com id $userId não encontrado")
+            }
+            if (user.profile != null) {
+                val profile = user.profile!!
+                questions.forEach { question ->
+                    when (question.id) {
+                        "birthdate" -> {
+                            question.answer = profile.birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            question.hidden = true
+                        }
+                        "gender" -> {
+                            question.answer = profile.gender
+                            question.hidden = true
+                        }
+                        "q3_frequency" -> question.answer = profile.iciq3answer
+                        "q4_amount" -> question.answer = profile.iciq4answer
+                        "q5_interference" -> question.answer = profile.iciq5answer
+                        "q6_when" -> question.answer = profile.urinationLoss.split(",").toList()
+                    }
+                }
+            }
+        }
+
+        return questions
     }
 
     fun submitOnboardingAnswers(request: OnboardSubmitDTO): OnboardCompleteDTO {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
+import java.io.InputStream
 
 @Service
 class AzureBSClient {
@@ -38,6 +39,17 @@ class AzureBSClient {
         try {
             val blobClient = getBlobContainerClient().getBlobClient(uniqueFilename)
             blobClient.upload(file.inputStream, file.size, true)
+
+            return blobClient.blobUrl
+        } catch (e: IOException) {
+            throw RuntimeException("Falha ao fazer upload do arquivo $originalFilename", e)
+        }
+    }
+
+    fun upload(file: InputStream, fileSize: Long, uniqueFilename: String, originalFilename: String): String{
+        try {
+            val blobClient = getBlobContainerClient().getBlobClient(uniqueFilename)
+            blobClient.upload(file, fileSize, true)
 
             return blobClient.blobUrl
         } catch (e: IOException) {

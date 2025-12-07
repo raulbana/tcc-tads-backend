@@ -25,6 +25,7 @@ import br.ufpr.tads.daily_iu_services.domain.entity.exercise.ExerciseFeedback
 import br.ufpr.tads.daily_iu_services.domain.entity.exercise.UserWorkoutPlan
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Credential
 import br.ufpr.tads.daily_iu_services.domain.entity.user.OTP
+import br.ufpr.tads.daily_iu_services.domain.entity.user.PatientProfile
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Preferences
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Role
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
@@ -42,6 +43,7 @@ class UserService(
     private val tokenService: TokenJWTService,
     private val calendarService: CalendarService,
     private val workoutPlanService: WorkoutPlanService,
+    private val contentService: ContentService,
     private val userRepository: UserRepository,
     private val otpRepository: OTPRepository,
     private val mediaRepository: MediaRepository,
@@ -74,10 +76,22 @@ class UserService(
             salt = salt
         )
 
-        val patientProfile = UserMapper.INSTANCE.patientProfileDTOToPatientProfile(request.profile)
+        val patientProfile = request.profile?.let {
+            PatientProfile(
+                birthDate = it.birthDate,
+                gender = it.gender,
+                iciq3answer = it.iciq3answer,
+                iciq4answer = it.iciq4answer,
+                iciq5answer = it.iciq5answer,
+                iciqScore = it.iciqScore,
+                urinationLoss = it.urinationLoss
+            )
+        }
+
         val preferences = UserMapper.INSTANCE.preferencesDTOToPreferences(request.preferences) ?: Preferences(
             highContrast = false,
             bigFont = false,
+            darkMode = false,
             reminderWorkout = false,
             reminderCalendar = false,
             encouragingMessages = false
@@ -168,11 +182,16 @@ class UserService(
             NotFoundException("Usuário com ID $id não encontrado")
         }
 
-        return UserMapper.INSTANCE.userToUserSimpleDTO(user)
+        val contentStats = contentService.getUserContentStats(user.id!!)
+        val curtidas = contentStats["curtidas"] ?: 0
+        val salvos = contentStats["salvos"] ?: 0
+        val postagens = contentStats["postagens"] ?: 0
+
+        return UserMapper.INSTANCE.userToUserSimpleDTO(user, curtidas, salvos, postagens)
     }
 
     fun login(requestDTO: LoginRequestDTO): LoginResponseDTO {
-        val user = userRepository.findByEmail(requestDTO.email)
+        val user = userRepository.findByEmailAndBlockedFalse(requestDTO.email)
             ?: throw NotFoundException("Usuário ou senha inválidos")
 
         if (!passwordService.verifyPassword(requestDTO.password, user.credential)) {
@@ -186,7 +205,7 @@ class UserService(
     }
 
     fun sendEmailOTP(email: String) {
-        val user = userRepository.findByEmail(email)
+        val user = userRepository.findByEmailAndBlockedFalse(email)
 
         if (user != null) {
             val otp = generateOTP(user)
@@ -195,7 +214,7 @@ class UserService(
     }
 
     fun resetPassword(request: ChangePasswordDTO) {
-        val user = userRepository.findByEmail(request.email)
+        val user = userRepository.findByEmailAndBlockedFalse(request.email)
             ?: throw NotFoundException("Usuário com e-mail ${request.email} não encontrado")
 
         val otp = otpRepository.findByUserIdAndUsedFalse(user.id!!)

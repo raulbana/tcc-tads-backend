@@ -8,9 +8,7 @@ import br.ufpr.tads.daily_iu_services.adapter.input.user.dto.UserSimpleDTO
 import br.ufpr.tads.daily_iu_services.domain.entity.media.Media
 import br.ufpr.tads.daily_iu_services.domain.entity.user.PatientProfile
 import br.ufpr.tads.daily_iu_services.domain.entity.user.Preferences
-import br.ufpr.tads.daily_iu_services.domain.entity.user.Role
 import br.ufpr.tads.daily_iu_services.domain.entity.user.User
-import br.ufpr.tads.daily_iu_services.domain.entity.user.UserPermissionEnum
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
@@ -29,9 +27,15 @@ interface UserMapper {
     @Mapping(target = "profilePictureUrl", source = "profilePicture", qualifiedByName = ["mediaToUrl"])
     fun userToUserDTO(user: User): UserDTO
 
-    @Mapping(target = "profilePictureUrl", source = "profilePicture", qualifiedByName = ["mediaToUrl"])
-    @Mapping(target = "role", source = "role", qualifiedByName = ["roleToString"])
-    fun userToUserSimpleDTO(user: User): UserSimpleDTO
+    @Mapping(target = "id", source = "user.id")
+    @Mapping(target = "name", source = "user.name")
+    @Mapping(target = "email", source = "user.email")
+    @Mapping(target = "profilePictureUrl", source = "user.profilePicture", qualifiedByName = ["mediaToUrl"])
+    @Mapping(target = "role", source = "user.role", qualifiedByName = ["roleToString"])
+    @Mapping(target = "curtidas", source = "curtidas")
+    @Mapping(target = "salvos", source = "salvos")
+    @Mapping(target = "postagens", source = "postagens")
+    fun userToUserSimpleDTO(user: User, curtidas: Long, salvos: Long, postagens: Long): UserSimpleDTO
 
     @Mapping(target = "createdAt", defaultExpression = "java(java.time.LocalDateTime.now())")
     fun mediaDTOToEntity(dto: MediaDTO?): Media?
@@ -41,9 +45,6 @@ interface UserMapper {
 
     @Named("preferencesToPreferencesDTO")
     fun preferencesToPreferencesDTO(preferences: Preferences): PreferencesDTO
-
-    @Named("patientProfileDTOToPatientProfile")
-    fun patientProfileDTOToPatientProfile(profileDTO: PatientProfileDTO?): PatientProfile?
 
     @Named("patientProfileToPatientProfileDTO")
     fun patientProfileToPatientProfileDTO(profile: PatientProfile?): PatientProfileDTO?

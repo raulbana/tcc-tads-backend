@@ -22,6 +22,7 @@ class PreferencesService(private val repository: UserRepository) {
             .orElseThrow { RuntimeException("Usuário não encontrado") }
         user.preferences.bigFont = preferences.isBigFont
         user.preferences.highContrast = preferences.isHighContrast
+        user.preferences.darkMode = preferences.isDarkMode
 
         repository.save(user)
     }

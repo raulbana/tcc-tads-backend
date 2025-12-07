@@ -67,7 +67,9 @@ abstract class ContentMapper {
     abstract fun userToAuthorDTO(user: User): AuthorDTO
 
     @Named("getCoverMedia")
-    fun getCoverMedia(mediaList: List<ContentMedia>) = mediaList.map { mediaToDTO(it) }.firstOrNull()
+    fun getCoverMedia(mediaList: List<ContentMedia>) = mediaList
+        .filter { it.media.contentType.contains("image") }
+        .map { mediaToDTO(it) }.firstOrNull()
 
     @Named("categoriesToString")
     fun categoriesToString(categories: List<ContentContentCategory>) = categories.map { it.category.name }
